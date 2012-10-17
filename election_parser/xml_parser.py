@@ -4,7 +4,8 @@ import json
 import datetime
 
 STATE = 'ca'
-e = ET().parse(open('real/X12PG_510.xml', 'r'))
+#e = ET().parse(open('real/X12PG_510.xml', 'r'))
+#json.dumps(full_parse(e))
 def full_parse(root):
     rv = {
         "format": ["adapted_sos_1"],
