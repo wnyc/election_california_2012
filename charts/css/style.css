@@ -1,0 +1,89 @@
+.button {
+    font-size: 12px;
+    color: white;
+    background-color: #3366cc;
+    display: inline;
+    border-right: 1px solid white;
+    padding-left: 2px;
+    padding-top: 2px;
+    padding-bottom: 15px;
+    padding-right: 0px;
+    text-align: left;
+    float: left;
+    width: 117px;
+    border-bottom: 2px solid #ff6666;
+}
+.button:hover {
+    background-color: #ff6666;
+}
+.button-selected {
+    background-color: #ff6666;
+
+}
+#buttons {
+    width: 725px;
+    display: block;
+    clear: both;
+    z-index: 2;
+
+}
+#chart-canvas {
+    float: left;
+    width: 350px;
+}
+#map-canvas {
+    float: left;
+    width: 350px;
+
+}
+
+#federal-contest-results #contest-title {
+    font-size: 24px;
+    font-weight: bold;
+}
+#federal-contest-results #contest-district {
+    font-weight: bold;
+
+}
+
+#contest-percent-reporting {
+    float: right;
+    color: #999;
+}
+.percent-reporting {
+    font-size: 24px;
+    float: right;
+    clear: both;
+
+}
+.reporting-detail {
+    font-size: 12px;
+    float: right;
+    clear: both;
+}
+
+.contest-basics {
+    float: left;
+}
+.result-table {
+    border-top: 1px solid #999;
+    width: 100%;
+    float: left;
+    clear: both;
+    margin-top: 25px;
+    text-align: left;
+}
+.result-table th {
+    font-weight: normal;
+    color: #999;
+    font-size: 12px;
+}
+.result-table tr {
+    height: 25px;
+
+}
+
+.table-right {
+    text-align: right;
+
+}

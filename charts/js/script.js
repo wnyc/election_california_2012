@@ -161,10 +161,29 @@ $(document).ready(function(){
             }
 
             $(this.el).html(federal_contest_template(json));
-            $('#container').html($(this.el)); // Testing code
+            $('#chart-canvas').append($(this.el)); // Testing code
             return this;
         }
     });
+
+    var Router = Backbone.Router.extend({
+        routes : {
+           "body/:body" : "navto",
+           "body/:body/:contest" : "navto",
+           "body/:body/:contest/:county" : "navto"
+        },
+
+        navto: function(body, contest, county) {
+            console.log(body);
+            console.log(contest);
+            console.log(county);
+            
+
+        }
+
+    });
+    var router = new Router();
+    Backbone.history.start();
 
     $.getJSON("data/sample.json", function(data)
     {
