@@ -15,7 +15,7 @@ setup(
     version="%d.%d.%d" % election.VERSION,
     long_description=__doc__,
     py_modules = [
-        "election/mock/server"
+        "election/test/live_server"
         ],
     packages = ["election"],
     zip_safe=True,
