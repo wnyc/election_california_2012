@@ -7,7 +7,9 @@ from states import data as state_data
 
 #e = ET().parse(open('real/X12PG_510.xml', 'r'))
 #json.dumps(full_parse(e))
-def parse(data):
+
+
+def parse(data, state):
     e = ET()
     for datum in data.values():
         e.parse(datum.read())

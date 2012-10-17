@@ -1,20 +1,3 @@
-import election_parser.ca
-import election_parser.xml_parser
-import gflags
-import paramiko 
-from StringIO import StringIO
-import itertools
-import os.path
-import Queue
-import os
-import threading
-import scpclient
-import contextlib
-from lxml.etree import ElementTree
-from lxml import etree
-import json
-
-
 """fetch_parse_and_upload_election_data
 
 This process fetches data from the CA election server (or optionally
@@ -33,6 +16,26 @@ all.json - A json file including all of the data
 *.xml - The original california XML files, unzipped.
 *.zip - The original california XML files as zipped
 """
+
+import election_parser.ca
+import election_parser.states
+import election_parser.xml_parser
+import gflags
+import paramiko 
+from StringIO import StringIO
+import itertools
+import os.path
+import Queue
+import os
+import threading
+import scpclient
+import contextlib
+from lxml.etree import ElementTree
+from lxml import etree
+import json
+
+STATE = election_parser.states.CA
+
 FLAGS = gflags.FLAGS
 
 gflags.DEFINE_multistring('ssh', [], 'SSH targets to write to')
@@ -56,7 +59,6 @@ class Writer:
 class LocalWriter(Writer):
     def write_file(self, name, data):
         f = open(self.absolute_path(name), "w+")
-        print type(data)
         f.write(data)
         f.close()
 
@@ -107,9 +109,6 @@ class AggregateWriter:
             child.join()
 
         
-# return type(xml_parser.full_parse(e))
-# return json.dumps(
-
 def main(argv, stdout, doc=__doc__):
     try:
         argv = FLAGS(argv[1:])
@@ -121,14 +120,10 @@ def main(argv, stdout, doc=__doc__):
         print >>sys.stderr, "No S3 support yet, we suck" 
         return 1
 
-    data, original, name = election_parser.ca.fetch()
+    data, original, name = election_parser.fetch(STATE)
 
-    
     if not FLAGS.ssh and not FLAGS.s3 and not FLAGS.local:
-        # This really should be all.json.  And yes, we'll need a
-        # special all.json only call here.
-        election_parser.xml_parser.parse(data)
-        # print parse()
+        return election_parser.xml_parser.parse(data, STATE)
         return 0
 
     writer = AggregateWriter(
