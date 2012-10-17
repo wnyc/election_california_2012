@@ -1,7 +1,11 @@
 import BaseHTTPServer
 import bisect
 import gflags
+import logging
+import glob
+import time
 import os
+import os.path
 import sys
 
 """
@@ -32,10 +36,6 @@ gflags.DEFINE_string('host', '127.0.0.1', 'Host to bind to')
 gflags.DEFINE_string('docroot', docroot, 'Document root - defaults to the package resource for the CA 2012 election test data')
 
 
-class HandlerClass(BaseHTTPServer.BaseHTTPRequestHandler):
-    pass
-
-ServerClass  = BaseHTTPServer.HTTPServer
 Protocol     = "HTTP/1.0"
 
 class TimeSensitiveFileLookup:
@@ -55,6 +55,8 @@ class TimeSensitiveFileLookup:
         for orderings in self.files.values():
             orderings.sort()
         
+    def __str__(self):
+        return str(self.files)
     def get(self, filename, offset):
         offset = bisect.bisect_right(self.files[filename], (offset, True))
         if offset <= 0:
@@ -62,9 +64,39 @@ class TimeSensitiveFileLookup:
         else:
             offset = offset - 1
         return self.files[filename][offset][2]
+
       
-      
+class HandlerClass(BaseHTTPServer.BaseHTTPRequestHandler):
+
+    def offset(self):
+        return time.time() - self.server.start_time
+
+    def do_GET(self):
+        filename = os.path.basename(self.path)
+        try:
+            filename = self.server.tsfl.get(filename, self.offset())
+        except IndexError:
+            self.send_error(404)
+            return
+
+        self.send_response(200)
+        self.end_headers()
+        data = open(os.path.join(FLAGS.docroot, filename)).read()
+        self.wfile.write(data)
+
+class ServerClass( BaseHTTPServer.HTTPServer):
+    @staticmethod
+    def files():
+        path = os.path.join(FLAGS.docroot, '*')
+        for fn in glob.glob(os.path.join(FLAGS.docroot, '*')):
+            yield os.path.basename(fn)
+
+    def __init__(self, *args, **kwargs):
+        BaseHTTPServer.HTTPServer.__init__(self, *args, **kwargs)
+        self.tsfl = TimeSensitiveFileLookup(self.files(), FLAGS.delay)
+        self.start_time = time.time()
     
+
 
 def main(argv):
     try:
@@ -73,13 +105,7 @@ def main(argv):
         print "Usage: %s ARGS\\n%s" % (sys.argv[0], FLAGS)
         return 1
     
-    server_address = (GFLAGS.host, GFLAGS.port)
-    sa = httpd.socket.getsockname()
-    log.INFO("Serving HTTP on %s port %s " % tuple(sa))
-    
-    HandlerClass.protocol_version = Protocol
-    httpd = ServerClass(server_address, HandlerClass)
-
-    httpd.serve_forever()
+    server_address = (FLAGS.host, FLAGS.port)
+    httpd = ServerClass(server_address, HandlerClass).serve_forever()
 
     
