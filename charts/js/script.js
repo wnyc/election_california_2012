@@ -1,8 +1,11 @@
 $(document).ready(function(){
-    var federal_contest_template = Handlebars.compile($("#federal-contest-template").html());
+    var statewide_contest_template = Handlebars.compile($("#statewide-contest-template").html());
     var county_results_template = Handlebars.compile($("#county-results-template").html());
     var result_row_template = Handlebars.compile($("#result-row-template").html());
     var result_table_template = Handlebars.compile($("#result-table-template").html());
+    var election;
+    var selected_body = null, selected_contest = null, selected_county = null;
+    var presidential_view, ussenate_view, ushouse_view, casenate_view, caassembly_view, propositions_view;
     Handlebars.registerHelper('result_table_template', result_table_template);
     Handlebars.registerHelper('county_results_template', county_results_template);
 
@@ -146,9 +149,9 @@ $(document).ready(function(){
         
         
         
-    var FederalContestView = Backbone.View.extend({
+    var StatewideContestView = Backbone.View.extend({
         tagName: "div",
-        id: "federal-contest-results",
+        id: "statewide-contest-results",
         render: function(county_name) {
             var json = this.model.toJSON();
             json.body_title = json.body.get("title");
@@ -160,11 +163,13 @@ $(document).ready(function(){
                 var county_results = json.counties.where({title: county_name}).pop();
             }
 
-            $(this.el).html(federal_contest_template(json));
-            $('#chart-canvas').append($(this.el)); // Testing code
+            $(this.el).html(statewide_contest_template(json));
+            $('#chart-canvas').html($(this.el)); // Testing code
             return this;
         }
     });
+
+    
 
     var Router = Backbone.Router.extend({
         routes : {
@@ -174,6 +179,30 @@ $(document).ready(function(){
         },
 
         navto: function(body, contest, county) {
+            selected_body = body || '';
+            selected_contest = contest || '';
+            selected_county = county || '';
+            if (body == "presidential")
+            {
+                presidential_view.render(county);
+            }
+            else if (body == "ussenate")
+            {
+                ussenate_view.render(county);
+            }
+            else if (body == "ushouse")
+            {
+            }
+            else if (body == "casenate")
+            {
+            }
+            else if (body == "caassembly")
+            {
+            }
+            else if (body == "capropositions")
+            {
+            }
+
             console.log(body);
             console.log(contest);
             console.log(county);
@@ -182,18 +211,34 @@ $(document).ready(function(){
         }
 
     });
-    var router = new Router();
-    Backbone.history.start();
+
 
     $.getJSON("data/sample.json", function(data)
     {
+        var router;
         election = new Election();
         election.parse_bodies(data.bodies);
+        presidential_view = new StatewideContestView({model: election.where({title: 'President'}).pop().get("contests").at(0)});
+        if (election.where({title: 'US Senate'}).pop())
+        {
+            ussenate_view = new StatewideContestView({model: election.where({title: 'US Senate'}).pop().get("contests").at(0)});
+        }
+        else
+        {
+        }
+        router = new Router();
+        $('.button').click(function(){
+            var which_body = $(this).attr('id').split("-")[0];
+            $('.button').removeClass("button-selected");
+            $(this).addClass("button-selected");
+            selected_body = which_body;
+            router.navigate("#body/" + selected_body + "/" + selected_contest + "/" + selected_county, {trigger: true});
+
+        });
+        Backbone.history.start();
 
 
         // TESTING Code
-        presidential_view = new FederalContestView({model: election.at(1).get("contests").at(0)});
-        presidential_view.render();
 
     });
 
