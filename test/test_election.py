@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-import unittest
-import election_parser.utils
 import election_parser.test
+import election_parser.utils
 from pkg_resources import resource_filename
+import unittest
 
 ZIPFILE = resource_filename(election_parser.test.__name__, 'data/00000001-X12PG.zip')
 

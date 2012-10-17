@@ -30,6 +30,7 @@ setup(
         'paramiko',
         'python-gflags',
         'pycurl',
-        'scpclient'
+        'scpclient',
+        'unittest2'
         ]
 )
