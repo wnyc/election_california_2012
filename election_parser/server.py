@@ -1,4 +1,4 @@
-import election.ca
+import election_parser.ca
 import gflags
 import paramiko 
 from StringIO import StringIO
@@ -10,7 +10,7 @@ import threading
 import scpclient
 import contextlib
 
-"""fetch_and_upload_election_data
+"""fetch_parse_and_upload_election_data
 
 This process fetches data from the CA election server (or optionally
 the fake_election_server process included as part of this package),

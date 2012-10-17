@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 
 import unittest
-import election.utils
-import election.test
+import election_parser.utils
+import election_parser.test
 from pkg_resources import resource_filename
 
-ZIPFILE = resource_filename(election.test.__name__, 'data/00000001-X12PG.zip')
+ZIPFILE = resource_filename(election_parser.test.__name__, 'data/00000001-X12PG.zip')
 
 class TestZipDict(unittest.TestCase):
     def setUp(self):
-        self.zf = election.utils.ZipDict(ZIPFILE)
+        self.zf = election_parser.utils.ZipDict(ZIPFILE)
 
     def test_keys(self):
         self.assertEquals(sorted(self.zf.keys()),
