@@ -20,8 +20,9 @@ def full_parse(root, state):
         }
     contest_list = contests(root)
     for con in contest_list:
-        condata = contest_dict(con, state)
-        rv[condata['title']] = condata
+        body, condata = contest_dict(con, state)
+        rv['bodies'].setdefault(body[0], {'title': body[1], 'contests':{}})
+        rv['bodies'][body[0]]['contests'][condata['title']] = condata
     return rv
 
 def candidates(contest):
@@ -41,8 +42,8 @@ def vote_tuple(selection):
     except:
         ballot_name = candidate.find('./ProposalItem').attrib['ProposalIdentifier']
         id = ''
-    last_name = ballot_name.split().pop().lower()
-    display_id = '_'.join([last_name, id])
+    last_name = ballot_name.split().pop()
+    display_id = '_'.join([last_name.lower(), id])
     votes = int(selection.find('./ValidVotes').text)
     return (display_id, votes)
 
@@ -57,8 +58,8 @@ def candidate_dict(selection):
         ballot_name = candidate.find('./ProposalItem').attrib['ProposalIdentifier']
         id = ''
         party = None
-    last_name = ballot_name.split().pop().lower()
-    display_id = '_'.join([last_name, id])
+    last_name = ballot_name.split().pop()
+    display_id = '_'.join([last_name.lower(), id])
     votes = int(selection.find('./ValidVotes').text)
     try:
         count_metrics = selection.findall('./CountMetric')
@@ -88,9 +89,10 @@ def get_body(state, contest_id):
     return state_data[state]['body_mapper'][contest_id[:4]]
     
 def contest_dict(contest, state):
-    body = get_body(state, contest.find('./ContestIdentifier').attrib['Id'])
+    contest_id = contest.find('./ContestIdentifier').attrib['Id']
+    body = get_body(state, contest_id)
     title = contest.find('./ContestIdentifier/ContestName').text
-    geo = dict(state=state)
+    geo = dict(state=state, district=contest_id[6:8])
     candidates = dict()
     for selection in contest.findall('./TotalVotes/Selection'):
         display_id, candidate = candidate_dict(selection)
@@ -102,15 +104,20 @@ def contest_dict(contest, state):
         unit_id = reportingunit.find('./ReportingUnitIdentifier').attrib['Id']
         unit_title = reportingunit.find('./ReportingUnitIdentifier').text
         display_id = '_'.join([unit_title, unit_id])
-        geo = dict(state=state)
+        report_geo = dict(geo)
         precincts = precinct_dict(reportingunit)
         votes = dict()
         for selection in reportingunit.findall('./Selection'):
             display_id, num_votes = vote_tuple(selection)
             votes[display_id] = num_votes
-        counties[display_id] = dict(title=unit_title, geo=dict(geo), votes=votes, precincts=precincts)
-    return {'title': title,
+        counties[display_id] = dict(title=unit_title, 
+                                    geo=report_geo, 
+                                    votes=votes, 
+                                    precincts=precincts)
+    return (body, {
+            'contest_id': contest_id,
+            'title': title,
             'geo': geo,
             'candidates': candidates,
             'precincts': precincts,
-            'counties': counties}
+            'counties': counties})
