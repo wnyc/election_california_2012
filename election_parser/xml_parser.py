@@ -7,11 +7,11 @@ from states import data as state_data
 
 #e = ET().parse(open('real/X12PG_510.xml', 'r'))
 #json.dumps(full_parse(e))
+STATE = 'ca'
 def parse(data):
     e = ET()
-    for datum in data.values():
-        e.parse(datum.read())
-    return json.dumps(full_parse(e))
+    xmlhandle = e.parse(data[state_data[STATE]['file']].read())
+    return json.dumps(full_parse(xmlhandle))
 
 def full_parse(root, state):
     rv = {
@@ -86,7 +86,7 @@ def precinct_dict(precinct):
 
 
 def get_body(state, contest_id):
-    return statedata[state]['body_mapper'][contest_id[:4]]
+    return state_data[state]['body_mapper'][contest_id[:4]]
     
 def contest_dict(contest, state):
     body = get_body(state, contest.find('./ContestIdentifier').attrib['Id'])
