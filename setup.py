@@ -14,12 +14,7 @@ setup(
     name='election',
     version="%d.%d.%d" % election.VERSION,
     long_description=__doc__,
-    py_modules = [
-        "election",
-        "election/test",
-        "election/test/live_server",
-        ],
-    packages = ["election", "election.test"],
+    packages = ["election","election.test"],
     package_data = {'election.test': ['data/*']},
     zip_safe=True,
     license='???',

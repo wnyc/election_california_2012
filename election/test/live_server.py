@@ -69,7 +69,7 @@ class TimeSensitiveFileLookup:
 class HandlerClass(BaseHTTPServer.BaseHTTPRequestHandler):
 
     def offset(self):
-        return time.time() - self.server.start_time
+        return self.server.offset()
 
     def do_GET(self):
         filename = os.path.basename(self.path)
@@ -81,6 +81,7 @@ class HandlerClass(BaseHTTPServer.BaseHTTPRequestHandler):
 
         self.send_response(200)
         self.end_headers()
+        print "Returning ", filename, "for", self.path
         data = open(os.path.join(FLAGS.docroot, filename)).read()
         self.wfile.write(data)
 
@@ -91,10 +92,40 @@ class ServerClass( BaseHTTPServer.HTTPServer):
         for fn in glob.glob(os.path.join(FLAGS.docroot, '*')):
             yield os.path.basename(fn)
 
+    @staticmethod
+    def factory(*args, **kwargs):
+        if FLAGS.delay == 0:
+            return ZeroTickServerClass(*args, **kwargs)
+        return TickServerClass(*args, **kwargs)
+
     def __init__(self, *args, **kwargs):
         BaseHTTPServer.HTTPServer.__init__(self, *args, **kwargs)
-        self.tsfl = TimeSensitiveFileLookup(self.files(), FLAGS.delay)
+        self.tsfl = TimeSensitiveFileLookup(self.files(), self.delay())
+
+class TickServerClass(ServerClass):
+    def __init__(self, *args, **kwargs):
+        ServerClass.__init__(self, *args, **kwargs)
         self.start_time = time.time()
+
+    def delay(self):
+        return FLAGS.delay
+
+    def offset(self):
+        return time.time() - self.start_time
+
+class ZeroTickServerClass(ServerClass):
+    def offset(self):
+        try:
+            return self.tick 
+        finally:
+            self.tick += 1 
+
+    def delay(self):
+        return 1 
+
+    def __init__(self, *args, **kwargs):
+        ServerClass.__init__(self, *args, **kwargs)
+        self.tick = 1
     
 
 
@@ -106,6 +137,6 @@ def main(argv):
         return 1
     
     server_address = (FLAGS.host, FLAGS.port)
-    httpd = ServerClass(server_address, HandlerClass).serve_forever()
+    httpd = ServerClass.factory(server_address, HandlerClass).serve_forever()
 
     
