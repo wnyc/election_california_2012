@@ -1,0 +1,11 @@
+Note about files in the kml directory:
+
+california_counties.kmz ... is a simplified version of the Census 2010 shapefile for California counties. Some of the census attributes have been removed to save space.
+
+crc_20110815_cd_certified_statewide_kmz.kmz ... is the certified California US CONGRESS districts kmz from http://wedrawthelines.ca.gov/maps-final-draft-congressional-districts.html
+
+crc_20110815_sd_certified_statewide_kmz.kmz ... is the certified California STATE SENATE districts kmz from http://wedrawthelines.ca.gov/maps-final-draft-congressional-districts.html
+
+crc_20110815_ad_certified_statewide_kmz.kmz ... is the certified California STATE ASSEMBLY districts kmz from http://wedrawthelines.ca.gov/maps-final-draft-congressional-districts.html
+
+- John Keefe / WNYC
