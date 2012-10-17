@@ -1,0 +1,138 @@
+{
+  "format": ["adapted_sos_1"],
+  "last_updated": "2012-10-17T14:00:00-0400",
+  "bodies" : {
+    "ca.propositions": {
+      "title": "California Propositions",
+      "contests": {
+        "prop1": {
+          "title": "Right to Drive",
+          "geo": {"state": "ca"},
+          "candidates": {
+            "yes1": {
+              "id": "yes1",
+              "ballot_name": "Yes",
+              "last_name": "Yes",
+              "votes": 101,
+              "vote_percent": 20
+            },
+            "no1": {
+              "id": "no1",
+              "ballot_name": "No",
+              "last_name": "No",
+              "votes": 505,
+              "vote_percent": 80
+            }
+          },
+          "precincts": {
+            "total": 100,
+            "reporting": 20,
+            "reporting_percent": 20
+          },
+          "counties": {
+            "Sonoma1": {
+              "title": "Sonoma",
+              "geo": {"state": "ca", "fips": "12345" },
+              "votes" : {
+                "no1": 101,
+                "yes1": 505
+              },
+              "precincts": {
+                "total": 20,
+                "reporting": 10,
+                "reporting_percent": 50
+              }
+            }
+          }
+        }
+      }
+    },
+    "us.president" : {
+      "title": "President of the United States",
+      "contests": {
+        "ca": {
+          "title": "California",
+          "geo": {"state": "ca"},
+          "candidates": {
+            "obama1": {
+              "id": "obama1",
+              "ballot_name": "Barack Obama",
+              "last_name": "Obama",
+              "party": "Dem",
+              "votes": 1001,
+              "vote_percent": 50,
+              "incumbent": true
+            },
+            "romney1": {
+              "id": "romney1",
+              "ballot_name": "Mitt Romney",
+              "last_name": "Romney",
+              "party": "Rep",
+              "votes": 1001,
+              "vote_percent": 50,
+              "incumbent": false
+            }
+          },
+          "precincts": {
+            "total": 100,
+            "reporting": 20,
+            "reporting_percent": 20
+          },
+          "counties": {
+            "Sonoma1": {
+              "title": "Sonoma",
+              "geo": {"state": "ca", "fips": "12345" },
+              "votes" : {
+                "romney1": 1001,
+                "obama1": 1001
+              },
+              "precincts": {
+                "total": 20,
+                "reporting": 10,
+                "reporting_percent": 50
+              }
+            }
+          }
+        }
+      }
+    },
+    "ca.senate": {
+      "title": "State Senate",
+      "contests": {
+        "ca_district1": {
+          "longname": "District 1",
+          "geo": {"state": "ca", "district": "1", "fips": "2314A2"},
+          "candidates": {
+            "foo1": {
+              "id": "foo1",
+              "ballot_name": "Mr. Foo",
+              "last_name": "Foo",
+              "party": "PFP",
+              "votes": 1,
+              "vote_percent": 33,
+              "incumbent": true
+            },
+            "bar1": {
+              "id": "bar1",
+              "ballot_name": "Mr. Bar",
+              "last_name": "Bar",
+              "party": "Grn",
+              "votes": 2,
+              "vote_percent": 66.6,
+              "incumbent": false
+            }
+          },
+          "precincts": {
+            "total": 1,
+            "reporting": 1,
+            "reporting_percent": 100
+          }
+        }
+      }
+    }
+
+  }
+
+
+
+}
