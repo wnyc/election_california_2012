@@ -179,7 +179,7 @@ s.parentNode.insertBefore(ga, s);
 </script>
 
 <!-- Template for president / US Senate -->
-<script type="text/x-handlebars-template" id="federal-contest-template">
+<script type="text/x-handlebars-template" id="statewide-contest-template">
     <div class="contest-basics">
         <div id="contest-title">{{body_title}}</div>
         <div id="contest-district">California vote</div>
@@ -193,7 +193,7 @@ s.parentNode.insertBefore(ga, s);
         {{{result_table_template this}}}
     </div>
     {{#if county_results}}
-        <div id="federal-contest-county">
+        <div id="statewide-contest-county">
             {{{county_results_template county_results}}}
         </div>
     {{/if}}
