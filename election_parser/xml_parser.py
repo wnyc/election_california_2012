@@ -10,8 +10,8 @@ from states import data as state_data
 
 def parse(data, state):
     e = ET()
-    xmlhandle = e.parse(data[state_data[STATE]['file']].read())
-    return json.dumps(full_parse(xmlhandle))
+    xmlhandle = e.parse(data[state_data[state]['file']])
+    return json.dumps(full_parse(xmlhandle, state))
 
 def full_parse(root, state):
     rv = {
