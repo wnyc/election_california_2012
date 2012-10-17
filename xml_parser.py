@@ -14,12 +14,7 @@ def full_parse(root):
     contest_list = contests(root)
     for con in contest_list:
         condata = contest_dict(con)
-        rv[condata['title']] = {
-            'candidates': dict([
-                    candidate_dict(c) for c in selections(con)
-                    ]),
-            'contest': condata
-            }
+        rv[condata['title']] = contest_dict(con)
     return rv
 
 def candidates(contest):
@@ -87,7 +82,8 @@ def contest_dict(contest):
     candidates = dict()
     for selection in contest.findall('./TotalVotes/Selection'):
         display_id, candidate = candidate_dict(selection)
-        candidates[display_id] = candidates
+        candidates[display_id] = candidate
+
     precincts = precinct_dict(contest.find('./TotalVotes'))
     counties = dict()
     for reportingunit in contest.findall('./ReportingUnitVotes'):
@@ -100,7 +96,7 @@ def contest_dict(contest):
         for selection in reportingunit.findall('./Selection'):
             display_id, num_votes = vote_tuple(selection)
             votes[display_id] = num_votes
-        counties[display_id] = dict(title=unit_title, geo=geo, votes=votes, precincts=precincts)
+        counties[display_id] = dict(title=unit_title, geo=dict(geo), votes=votes, precincts=precincts)
     return {'title': title,
             'geo': geo,
             'candidates': candidates,
