@@ -3,10 +3,17 @@ from lxml import etree
 import json
 import datetime
 
-STATE = 'ca'
+from states import data as state_data
+
 #e = ET().parse(open('real/X12PG_510.xml', 'r'))
 #json.dumps(full_parse(e))
-def full_parse(root):
+def parse(data):
+    e = ET()
+    for datum in data.values():
+        e.parse(datum.read())
+    return json.dumps(full_parse(e))
+
+def full_parse(root, state):
     rv = {
         "format": ["adapted_sos_1"],
         "last_updated": str(datetime.datetime.now()),
@@ -14,8 +21,8 @@ def full_parse(root):
         }
     contest_list = contests(root)
     for con in contest_list:
-        condata = contest_dict(con)
-        rv[condata['title']] = contest_dict(con)
+        condata = contest_dict(con, state)
+        rv[condata['title']] = condata
     return rv
 
 def candidates(contest):
@@ -41,6 +48,7 @@ def vote_tuple(selection):
     return (display_id, votes)
 
 def candidate_dict(selection):
+    ##TODO: issue to group Barack Obama votes across party affils?
     candidate = selection.find('./Candidate')
     try:
         ballot_name = candidate.find('./CandidateIdentifier/CandidateName').text
@@ -76,10 +84,14 @@ def precinct_dict(precinct):
             'reporting': reporting, 
             'reporting_percent': reporting_percent}
 
+
+def get_body(state, contest_id):
+    return statedata[state]['body_mapper'][contest_id[:4]]
     
-def contest_dict(contest):
+def contest_dict(contest, state):
+    body = get_body(state, contest.find('./ContestIdentifier').attrib['Id'])
     title = contest.find('./ContestIdentifier/ContestName').text
-    geo = dict(state=STATE)
+    geo = dict(state=state)
     candidates = dict()
     for selection in contest.findall('./TotalVotes/Selection'):
         display_id, candidate = candidate_dict(selection)
@@ -91,7 +103,7 @@ def contest_dict(contest):
         unit_id = reportingunit.find('./ReportingUnitIdentifier').attrib['Id']
         unit_title = reportingunit.find('./ReportingUnitIdentifier').text
         display_id = '_'.join([unit_title, unit_id])
-        geo = dict(state=STATE)
+        geo = dict(state=state)
         precincts = precinct_dict(reportingunit)
         votes = dict()
         for selection in reportingunit.findall('./Selection'):
@@ -103,4 +115,3 @@ def contest_dict(contest):
             'candidates': candidates,
             'precincts': precincts,
             'counties': counties}
-

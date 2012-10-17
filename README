@@ -26,3 +26,6 @@ fetch_and_upload_election_data --input=http://127.0.0.1:2012 --ssh=adeprince@dev
 (Yes folks, fetch_and_upload_election_data does a fair amount of
 threeading to hide I/O latency)
   
+5. Or just dump it to stdout
+
+# fetch_parse_and_upload_election_data --input=http://127.0.0.1:2012

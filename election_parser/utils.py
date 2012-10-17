@@ -9,6 +9,10 @@ class ZipDict:
     def keys(self):
         return self.zf.namelist()
 
+    def values(self):
+        for key in self.keys():
+            yield self[key]
+
     def __getitem__(self, key):
         return self.zf.open(key)
     
