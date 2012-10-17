@@ -5,12 +5,13 @@ import datetime
 
 from states import data as state_data
 
-#open('foo.json','w').write(a.parse({'X12PG_510.xml': open('real/X12PG_510.xml','r')}))
-STATE = 'ca'
-def parse(data):
+#e = ET().parse(open('real/X12PG_510.xml', 'r'))
+#json.dumps(full_parse(e))
+
+def parse(data, state):
     e = ET()
-    xmlhandle = e.parse(data[state_data[STATE]['file']])
-    return json.dumps(full_parse(xmlhandle, STATE))
+    xmlhandle = e.parse(data[state_data[state]['file']])
+    return json.dumps(full_parse(xmlhandle, state))
 
 def full_parse(root, state):
     rv = {
