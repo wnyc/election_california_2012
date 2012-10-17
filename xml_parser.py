@@ -1,17 +1,44 @@
-from lxml.etree import ElemenTree as ET
+from lxml.etree import ElementTree as ET
+from lxml import etree
 import json
+import datetime
 
 STATE = 'ca'
+e = ET().parse(open('real/X12PG_510.xml', 'r'))
+def full_parse(root):
+    rv = {
+        "format": ["adapted_sos_1"],
+        "last_updated": str(datetime.datetime.now()),
+        "bodies": {}
+        }
+    contest_list = contests(root)
+    for con in contest_list:
+        condata = contest_dict(con)
+        rv[condata['title']] = {
+            'candidates': dict([
+                    candidate_dict(c) for c in selections(con)
+                    ]),
+            'contest': condata
+            }
+    return rv
 
 def candidates(contest):
     return contest.findall('./TotalVotes/Selection/Candidate')
 
+def selections(contest):
+    return contest.findall('./TotalVotes/Selection')
+
 def contests(root):
     return root.find('./Count/Election/Contests').findall('Contest')
 
-def votes(selection):
+def vote_tuple(selection):
     candidate = selection.find('./Candidate')
-    id = candidate.find('./CandidateIdentifier').attrib['Id']
+    try:
+        ballot_name = candidate.find('./CandidateIdentifier/CandidateName').text
+        id = candidate.find('./CandidateIdentifier').attrib['Id']
+    except:
+        ballot_name = candidate.find('./ProposalItem').attrib['ProposalIdentifier']
+        id = ''
     last_name = ballot_name.split().pop().lower()
     display_id = '_'.join([last_name, id])
     votes = int(selection.find('./ValidVotes').text)
@@ -19,17 +46,27 @@ def votes(selection):
 
 def candidate_dict(selection):
     candidate = selection.find('./Candidate')
-    ballot_name = candidate.find('./CandidateIdentifier/CandidateName').text
-    party = candidate.find('./Affiliation/Type').text
-    id = candidate.find('./CandidateIdentifier').attrib['Id']
+    try:
+        ballot_name = candidate.find('./CandidateIdentifier/CandidateName').text
+        id = candidate.find('./CandidateIdentifier').attrib['Id']
+        party = candidate.find('./Affiliation/Type').text
+    except:
+        ballot_name = candidate.find('./ProposalItem').attrib['ProposalIdentifier']
+        id = ''
+        party = None
     last_name = ballot_name.split().pop().lower()
     display_id = '_'.join([last_name, id])
     votes = int(selection.find('./ValidVotes').text)
-    vote_percent = [x for x in selection.findall('./CountMetric') if x.attrib['Id']=='PVR'].pop().text
-    return (display_id,{'ballot_name':ballot_name,
-        'id':id,
+    try:
+        count_metrics = selection.findall('./CountMetric')
+        vote_percent = [x for x in count_metrics if x.attrib['Id']=='PVR'].pop().text
+    except:
+        vote_percent = None #TODO
+
+    return (display_id, {'ballot_name':ballot_name,
+        'id': display_id,
         'ballot_name': ballot_name,
-        'party':party, 
+        'party': party,
         'last_name':last_name,
         'votes' : votes,
         'vote_percent' : vote_percent,
@@ -39,7 +76,9 @@ def precinct_dict(precinct):
     total = int(precinct.find('./CountMetric[@Id="TP"]').text)
     reporting = int(precinct.find('./CountMetric[@Id="PR"]').text)
     reporting_percent = 100 * float(reporting)/float(total)
-    return dict(total=total, reporting=reporting, reporting_percent=reporting_percent)
+    return {'total': total, 
+            'reporting': reporting, 
+            'reporting_percent': reporting_percent}
 
     
 def contest_dict(contest):
@@ -59,12 +98,12 @@ def contest_dict(contest):
         precincts = precinct_dict(reportingunit)
         votes = dict()
         for selection in reportingunit.findall('./Selection'):
-            display_id, num_votes = votes(selection)
+            display_id, num_votes = vote_tuple(selection)
             votes[display_id] = num_votes
         counties[display_id] = dict(title=unit_title, geo=geo, votes=votes, precincts=precincts)
-    return dict(title=title,
-            geo=geo,
-            candidates=candidates,
-            precincts=precincts,
-            counties=counties)
+    return {'title': title,
+            'geo': geo,
+            'candidates': candidates,
+            'precincts': precincts,
+            'counties': counties}
 
