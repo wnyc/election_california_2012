@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
 import unittest
-import election.test.live_server 
+import election_parser.test.live_server 
 
 class TestTimeSensitiveFileLookup(unittest.TestCase):
     def setUp(self):
-        self.tsfl = election.test.live_server.TimeSensitiveFileLookup(
+        self.tsfl = election_parser.test.live_server.TimeSensitiveFileLookup(
             ("0-index.html", "1-index.html", "2-index.html"), 60)
         
     def test_0(self):

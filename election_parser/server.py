@@ -1,4 +1,5 @@
-import election.ca
+import election_parser.ca
+import election_parser.xml_parser
 import gflags
 import paramiko 
 from StringIO import StringIO
@@ -9,8 +10,12 @@ import os
 import threading
 import scpclient
 import contextlib
+from lxml.etree import ElementTree
+from lxml import etree
+import json
 
-"""fetch_and_upload_election_data
+
+"""fetch_parse_and_upload_election_data
 
 This process fetches data from the CA election server (or optionally
 the fake_election_server process included as part of this package),
@@ -101,6 +106,9 @@ class AggregateWriter:
         for child in self.children:
             child.join()
 
+        
+# return type(xml_parser.full_parse(e))
+# return json.dumps(
 
 def main(argv, stdout, doc=__doc__):
     try:
@@ -113,13 +121,14 @@ def main(argv, stdout, doc=__doc__):
         print >>sys.stderr, "No S3 support yet, we suck" 
         return 1
 
-    data, original, name = election.ca.fetch()
+    data, original, name = election_parser.ca.fetch()
 
     
     if not FLAGS.ssh and not FLAGS.s3 and not FLAGS.local:
         # This really should be all.json.  And yes, we'll need a
         # special all.json only call here.
-        print str(data.keys())
+        election_parser.xml_parser.parse(data)
+        # print parse()
         return 0
 
     writer = AggregateWriter(
@@ -133,8 +142,7 @@ def main(argv, stdout, doc=__doc__):
     # Insert parser here.  Yes, its better to start sending stuff that
     # doesn't require parsing before we start the laborous process of parsing.
 
-
-    parsed_results = {}
+    parsed_results = {'all.json':election_parser.xml_parser.parse(data)}
 
     for key in parsed_results:
         writer.write_file(key, parsed_results[key])

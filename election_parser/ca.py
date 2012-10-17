@@ -2,7 +2,7 @@ import gflags
 import sys
 import pycurl
 import StringIO
-import election.utils
+import election_parser.utils
 import os
 import os.path
 
@@ -19,5 +19,5 @@ def fetch(url=FLAGS.input):
     c.setopt(c.WRITEFUNCTION, payload.write)
     c.perform()
     c.close()
-    return election.utils.ZipDict(payload), payload, os.path.basename(url)
+    return election_parser.utils.ZipDict(payload), payload, os.path.basename(url)
     

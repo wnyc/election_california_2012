@@ -6,8 +6,13 @@ import datetime
 from states import data as state_data
 
 #e = ET().parse(open('real/X12PG_510.xml', 'r'))
-#json.dumps(full_parse(e, 'ca')) #'ca' = California
-#TODO: no votes should -> 0 for votes and percents!
+#json.dumps(full_parse(e))
+def parse(data):
+    e = ET()
+    for datum in data.values():
+        e.parse(datum.read())
+    return json.dumps(full_parse(e))
+
 def full_parse(root, state):
     rv = {
         "format": ["adapted_sos_1"],
