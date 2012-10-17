@@ -1,7 +1,7 @@
 {
   "format": ["adapted_sos_1"],
   "last_updated": "2012-10-17T14:00:00-0400",
-  "bodies" {
+  "bodies" : {
     "ca.propositions": {
       "title": "California Propositions",
       "contests": {
@@ -33,7 +33,7 @@
             "Sonoma1": {
               "title": "Sonoma",
               "geo": {"state": "ca", "fips": "12345" },
-              "votes" {
+              "votes" : {
                 "no1": 101,
                 "yes1": 505
               },
@@ -82,7 +82,7 @@
             "Sonoma1": {
               "title": "Sonoma",
               "geo": {"state": "ca", "fips": "12345" },
-              "votes" {
+              "votes" : {
                 "romney1": 1001,
                 "obama1": 1001
               },
