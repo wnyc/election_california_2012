@@ -1,0 +1,20 @@
+How to use this library:
+
+1. Install
+
+pip install election
+
+2. Setup a fake live CA server to test against
+
+# fake_election_server --delay=0
+
+3. Talk to the server
+
+# python
+Python version 2.6.1
+>>> import election.ca
+>>> data = election.ca.fetch(server='127.0.0.1:2012')  # If this was a real election you'd just write "election.ca.fetch()"
+
+
+
+  
