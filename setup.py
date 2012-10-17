@@ -24,9 +24,12 @@ setup(
         ],
     scripts = [
         "scripts/fake_election_server",
+        "scripts/fetch_and_upload_election_data", 
         ],
     install_requires = [
+        'paramiko',
         'python-gflags',
         'pycurl',
+        'scpclient'
         ]
 )
