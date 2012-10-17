@@ -3,19 +3,21 @@ import sys
 import pycurl
 import StringIO
 import election.utils
+import os
+import os.path
 
 FLAGS = gflags.FLAGS
 
-gflags.DEFINE_string('url', 
+gflags.DEFINE_string('input', 
                       'http://media.sos.ca.gov/media/X12PG.zip',
                       'URL for CA\'s XML election data')
-def fetch(url=FLAGS.url):
+def fetch(url=FLAGS.input):
     payload = StringIO.StringIO()
 
     c = pycurl.Curl()
-    c.setopt(c.URL, FLAGS.url)
+    c.setopt(c.URL, url)
     c.setopt(c.WRITEFUNCTION, payload.write)
     c.perform()
     c.close()
-    return election.utils.ZipDict(payload)
+    return election.utils.ZipDict(payload), payload, os.path.basename(url)
     
