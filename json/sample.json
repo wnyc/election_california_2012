@@ -1,5 +1,6 @@
 {
   "format": ["adapted_sos_1"],
+  "last_updated": "2012-10-17T14:00:00-0400",
   "bodies" {
     "us.president" : {
       "title": "President of the United States",
