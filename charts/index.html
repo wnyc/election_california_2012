@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="http://project.wnyc.org/assets/css/embed.css" type="text/css" media="screen" title="no title" charset="utf-8">
 <link rel="stylesheet" href="http://project.wnyc.org/assets/css/dropdown.css" type="text/css" media="screen" title="no title" charset="utf-8">
 <link rel="stylesheet" href="http://project.wnyc.org/assets/css/jquery.alerts.css" type="text/css" media="screen" title="no title" charset="utf-8">
-<link rel="stylesheet" href="css/map.css" type="text/css" media="screen" title="no title" charset="utf-8">
+<link rel="stylesheet" href="css/style.css" type="text/css" media="screen" title="no title" charset="utf-8">
 <link href='http://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet' type='text/css' />
 <link href="http://project.wnyc.org/assets/css/smoothness/jquery-ui-1.8.23.custom.css" rel="stylesheet" type="text/css" />
 
@@ -99,7 +99,17 @@ s.parentNode.insertBefore(ga, s);
 
     
 <div id="container">
+<div id="updated"></div>
+<div id="buttons">
+    <div class="button" id="presidential-button">Presidential</div>
+    <div class="button" id="ussenate-button">US Senate</div>
+    <div class="button" id="ushouse-button">US House</div>
+    <div class="button" id="casenate-button">CA Senate</div>
+    <div class="button" id="caassembly-button">CA Assembly</div>
+    <div class="button" id="capropositions-button">Propositions</div>
 </div>
+<div id="chart-canvas"></div>
+<div id="map-canvas"></div>
 <!-- Put legend here -->
 
 <!-- General template for row of results -->
@@ -112,36 +122,53 @@ s.parentNode.insertBefore(ga, s);
     </tr>
 </script>
 
+<!-- Template for table of results -->
 <script type="text/x-handlebars-template" id="result-table-template">
-    <thead>
-    <tr>
-    <th>Candidate</th>
-    <th>Party</th>
-    <th>Votes</th>
-    <th>Percent</th>
-    </tr>
-    </thead>
-    <tbody>
-    {{#each candidates}}
+    <table class="result-table" id="contest-results">
+        <thead>
         <tr>
-            <td>{{ballot_name}}</td>
-            <td>{{party}}</td>
-            <td>{{votes}}</td>
-            <td>{{vote_percent}}%</td>
+        <th>Candidate</th>
+        <th>Party</th>
+        <th>Votes</th>
+        <th class="table-right">Percent</th>
         </tr>
+        </thead>
+        <tbody>
+        {{#each candidates}}
+            <tr>
+                <td>
+                    {{ballot_name}} 
+                    {{#if incumbent}}
+                    <!-- incumbent marker -->
 
-    {{/each}}
+                    {{/if}}
 
-    
-    </tbody>
+                    {{#if winner}}
+                    <!-- winner marker -->
+
+                    {{/if}}
+                </td>
+                <td>{{party}}</td>
+                <td>{{votes}}</td>
+                <td class="table-right">{{vote_percent}}%</td>
+            </tr>
+
+        {{/each}}
+
+        
+        </tbody>
+    </table>
+<!-- incumbent/winner key will go here -->
 </script>
 
 <!-- Template for County results -->
 
 <script type="text/x-handlebars-template" id="county-results-template">
-    <div id="county-title">{{title}}</div>
+    <div class="contest-basics"?
+        <div id="county-title">{{title}}</div>
+    </div>
     <div id="county-percent-reporting">
-        <div class="percent-reporting" id="county-percent">{{precincts_reporting_percent}}</div>
+        <div class="percent-reporting" id="county-percent">{{precincts_reporting_percent}}%</div>
         <div class="reporting-detail" id="county-reporting">reporting</div>
     </div>
     <div class="result-table-div">
@@ -153,17 +180,17 @@ s.parentNode.insertBefore(ga, s);
 
 <!-- Template for president / US Senate -->
 <script type="text/x-handlebars-template" id="federal-contest-template">
-    <div id="contest-title">{{body_title}}</div>
-    <div id="contest-district">California vote</div>
+    <div class="contest-basics">
+        <div id="contest-title">{{body_title}}</div>
+        <div id="contest-district">California vote</div>
+    </div>
     <div id="contest-percent-reporting">
-        <div class="percent-reporting" id="contest-percent">{{precincts_reporting_percent}}</div>
+        <div class="percent-reporting" id="contest-percent">{{precincts_reporting_percent}}%</div>
         <div class="reporting-detail" id="contest-reporting">reporting</div>
     </div>
 
     <div class="result-table-div">
-        <table class="result-table" id="contest-results">
         {{{result_table_template this}}}
-        </table>
     </div>
     {{#if county_results}}
         <div id="federal-contest-county">
@@ -172,6 +199,24 @@ s.parentNode.insertBefore(ga, s);
     {{/if}}
 
     </div>
+</script>
+
+<script type="text/x-handlebars-template" id="state-contest-template">
+    <div class="contest-basics">
+        <div id="contest-title">{{body_title}}</div>
+        <div id="contest-district">{{longname}}</div>
+    </div>
+    <div id="contest-percent-reporting">
+        <div class="percent-reporting" id="contest-percent">{{precincts_reporting_percent}}%</div>
+        <div class="reporting-detail" id="contest-reporting">reporting</div>
+    </div>
+    <div class="result-table-div">
+        {{{result_table_template this}}}
+    </div>
+</script>
+
+
+
 </script>
 
 <!-- End Box (aka dropdown) -->
