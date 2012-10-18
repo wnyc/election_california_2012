@@ -1,3 +1,9 @@
+body {
+    font-family: Helvetica, Arial, sans-serif;
+
+}
+
+
 .button {
     font-size: 12px;
     color: white;
@@ -37,11 +43,11 @@
 
 }
 
-#federal-contest-results #contest-title {
+#statewide-contest-results #contest-title {
     font-size: 24px;
     font-weight: bold;
 }
-#federal-contest-results #contest-district {
+#statewide-contest-results #contest-district {
     font-weight: bold;
 
 }

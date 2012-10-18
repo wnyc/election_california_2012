@@ -4,7 +4,7 @@ $(document).ready(function(){
     var result_row_template = Handlebars.compile($("#result-row-template").html());
     var result_table_template = Handlebars.compile($("#result-table-template").html());
     var election;
-    var selected_body = null, selected_contest = null, selected_county = null;
+    var selected_body = "presidential", selected_contest = "ca", selected_county = "";
     var presidential_view, ussenate_view, ushouse_view, casenate_view, caassembly_view, propositions_view;
     Handlebars.registerHelper('result_table_template', result_table_template);
     Handlebars.registerHelper('county_results_template', county_results_template);
@@ -175,18 +175,16 @@ $(document).ready(function(){
         routes : {
            "body/:body" : "navto",
            "body/:body/:contest" : "navto",
+           "body/:body/:contest/" : "navto",
+           "body/:body/:contest/:county/" : "navto",
            "body/:body/:contest/:county" : "navto"
         },
 
         navto: function(body, contest, county) {
-            selected_body = body || '';
-            selected_contest = contest || '';
+            selected_body = body || 'presidential';
+            selected_contest = contest || 'ca';
             selected_county = county || '';
-            if (body == "presidential")
-            {
-                presidential_view.render(county);
-            }
-            else if (body == "ussenate")
+            if (body == "ussenate")
             {
                 ussenate_view.render(county);
             }
@@ -202,10 +200,13 @@ $(document).ready(function(){
             else if (body == "capropositions")
             {
             }
+            else {
+                selected_body = 'presidential';
+                presidential_view.render(county);
 
-            console.log(body);
-            console.log(contest);
-            console.log(county);
+            }
+            $('.button').removeClass('button-selected');
+            $('#' + selected_body + '-button').addClass('button-selected');
             
 
         }
@@ -213,29 +214,26 @@ $(document).ready(function(){
     });
 
 
-    $.getJSON("data/sample.json", function(data)
+    $.getJSON("data/foo.json", function(data)
     {
         var router;
         election = new Election();
         election.parse_bodies(data.bodies);
-        presidential_view = new StatewideContestView({model: election.where({title: 'President'}).pop().get("contests").at(0)});
-        if (election.where({title: 'US Senate'}).pop())
-        {
-            ussenate_view = new StatewideContestView({model: election.where({title: 'US Senate'}).pop().get("contests").at(0)});
-        }
-        else
-        {
-        }
+        presidential_view = new StatewideContestView({model: election.where({name: 'us.president'}).pop().get("contests").at(0)});
+        ussenate_view = new StatewideContestView({model: election.where({name: 'us.senate'}).pop().get("contests").at(0)});
         router = new Router();
         $('.button').click(function(){
             var which_body = $(this).attr('id').split("-")[0];
-            $('.button').removeClass("button-selected");
-            $(this).addClass("button-selected");
             selected_body = which_body;
             router.navigate("#body/" + selected_body + "/" + selected_contest + "/" + selected_county, {trigger: true});
 
         });
-        Backbone.history.start();
+
+        if(!Backbone.history.start())
+        {
+            // By default start with presidential with no specific county
+            router.navigate("#body/presidential", {trigger: true});
+        }
 
 
         // TESTING Code
