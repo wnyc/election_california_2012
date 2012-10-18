@@ -6,8 +6,8 @@ import decimal
 
 from states import data as state_data
 
-#e = ET().parse(open('real/X12PG_510.xml', 'r'))
-#json.dumps(full_parse(e))
+#import xml_parser as a
+#open('foo.json','w').write(a.parse({'X12PG_510.xml': open('real/X12PG_510.xml','r')}, 'ca'))
 
 def parse(data, state):
     e = ET()
