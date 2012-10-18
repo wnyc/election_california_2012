@@ -1,13 +1,14 @@
-from lxml.etree import ElementTree
+from StringIO import StringIO 
+from lxml.etree import XMLParser,ElementTree
 from lxml import etree
 import json
 import datetime
 import decimal
 
-from states import data as state_data
-
 #import xml_parser as a
 #open('foo.json','w').write(a.parse({'X12PG_510.xml': open('real/X12PG_510.xml','r')}, 'ca'))
+
+        
 
 class GenericParser:
 
@@ -15,13 +16,30 @@ class GenericParser:
         self.year = year
 
     def element_tree_factory(self):
-        return ElementTree()
+        element_tree = ElementTree().parser
+        # raise Exception(dir(element_tree))
+        #element_tree = XMLParser()
+        element_tree.resolvers.add(self.Resolver())
+        return element_tree
+
+    def apply_replacements(self, data):
+        # I'm sure Knuth knows a faster O(n+m) way of doing this.
+        for before, after in self.STRING_REPLACEMENTS:
+            data = data.replace(before, after)
+        return data
     
-    def parse(self, data, update_url):
-        tree = cls.element_tree_factory()
-        root = tree.parse(cls.read_data(data))
-        data = cls.full_parse(root)
-        data['update_url'] = update_url
+    def parse(self, data, update_url=None):
+        tree = self.element_tree_factory()
+        data = self.read_data(data)
+        # data = self.apply_replacements(data)
+        # raise Exception(str(type(etree.parse(data, tree))))
+        data = data.replace('&nbsp;', '' )
+        root = etree.parse(StringIO(data), tree)
+        
+        data = self.full_parse(root)
+        if update_url is not None:
+            data['update_url'] = update_url
+        yield 'all', data
 
     def read_data(self, data):
         # We assume there is only one data file, this may not be true
@@ -30,7 +48,7 @@ class GenericParser:
         # don't need both of them.
         for filename in data:
             if self.is_correct_file(filename):
-                return data[filename]
+                return data[filename].read()
 
     def full_parse(self, root):
         bodies = {}
@@ -38,14 +56,15 @@ class GenericParser:
             "format": ["adapted_sos_1"],
             "bodies": bodies
             }
-        contest_list = contests(root)
+        contest_list = self.contests(root)
         for con in contest_list:
-            body, condata = contest_dict(con, state)
-            key, title = body[:1]
+            body, condata = self.contest_dict(con)
+            key = body[0]
+            title = body[1]
             contests = {}
             bodies.setdefault(key, {'title': title, 'contests':contests})
             contests[condata['title']] = condata 
-        return {'all':parsed_data_root}
+        return parsed_data_root
 
     def candidates(self, contest):
         return contest.findall('./TotalVotes/Selection/Candidate')
@@ -54,6 +73,7 @@ class GenericParser:
         return contest.findall('./TotalVotes/Selection')
 
     def contests(self, root):
+        print root.find('./')
         return root.find('./Count/Election/Contests').findall('Contest')
 
     def vote_tuple(self, selection):
@@ -69,14 +89,14 @@ class GenericParser:
         votes = int(selection.find('./ValidVotes').text)
         return (display_id, votes)
 
-    def candidate_dict(self, selection, state):
+    def candidate_dict(self, selection):
         ##TODO: issue to group Barack Obama votes across party affils?
         candidate = selection.find('./Candidate')
         try:
             ballot_name = candidate.find('./CandidateIdentifier/CandidateName').text
             id = candidate.find('./CandidateIdentifier').attrib['Id']
             full_party = candidate.find('./Affiliation/Type').text
-            party = state_data[state]['parties'].get(full_party, full_party)
+            party = self.PARTIES.get(full_party, full_party)
         except AttributeError:
             ballot_name = candidate.find('./ProposalItem').attrib['ProposalIdentifier']
             id = ''
@@ -108,30 +128,35 @@ class GenericParser:
                 'reporting_percent': reporting_percent}
 
 
-    def get_body(self, state, contest_id):
         return state_data[state]['body_mapper'][contest_id[:4]]
 
-    def contest_dict(self, contest, state):
+
+    def get_body(self, contest_id):
+        return self.BODY_MAPPER[contest_id[:4]]
+
+    def contest_dict(self, contest):
         contest_id = contest.find('./ContestIdentifier').attrib['Id']
-        body = get_body(state, contest_id)
+        body = self.get_body(contest_id)
         title = contest.find('./ContestIdentifier/ContestName').text
-        geo = dict(state=state, district=contest_id[6:8])
+        
         candidates = dict()
         for selection in contest.findall('./TotalVotes/Selection'):
-            display_id, candidate = candidate_dict(selection, state)
+            display_id, candidate = self.candidate_dict(selection)
             candidates[display_id] = candidate
 
-        precincts = precinct_dict(contest.find('./TotalVotes'))
+        precincts = self.precinct_dict(contest.find('./TotalVotes'))
         counties = dict()
         for reportingunit in contest.findall('./ReportingUnitVotes'):
             unit_id = reportingunit.find('./ReportingUnitIdentifier').attrib['Id']
             unit_title = reportingunit.find('./ReportingUnitIdentifier').text
             display_id = '_'.join([unit_title, unit_id])
+
+            geo = dict(state=self.NAME, district=contest_id[6:8])
             report_geo = dict(geo)
-            precincts = precinct_dict(reportingunit)
+            precincts = self.precinct_dict(reportingunit)
             votes = dict()
             for selection in reportingunit.findall('./Selection'):
-                display_id, num_votes = vote_tuple(selection)
+                display_id, num_votes = self.vote_tuple(selection)
                 votes[display_id] = {'votes':num_votes}
             vote_total = sum([v['votes'] for v in votes.values()])
             for v in votes.values():
