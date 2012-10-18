@@ -2,15 +2,17 @@ import pycurl
 import StringIO
 import election_parser.utils
 import gflags
+import os
 
 FLAGS = gflags.FLAGS
 
-gflags.DEFINE_string('input', 
+gflags.DEFINE_string('url', 
                       'http://media.sos.ca.gov/media/X12PG.zip',
                       'URL for CA\'s XML election data')
 
 class GenericLoader:
-    def fetch(url=FLAGS.input):
+    @staticmethod
+    def fetch(url=FLAGS.url):
         payload = StringIO.StringIO()
         c = pycurl.Curl()
         c.setopt(c.URL, url)

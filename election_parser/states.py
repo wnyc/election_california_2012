@@ -29,20 +29,21 @@ class California(GenericParser, GenericLoader):
     STRING_REPLACEMENTS = (('&nbsp;', '&#160;'),)
 
     def is_correct_file(self, filename):
-        return self.year == 2012 and filename == "X12PG_510.xml"
+        return self.year == 2012 and filename.startswith("X12PG_510.xml")
 
     URL = "http://media.sos.ca.gov/media/X12PG.zip"
 
     class Resolver(etree.Resolver):
         def resolve(self, url, pubid, context):
-            print "URL: %s  Pubid: %s" % (url, pubid)
             return self.resolve_filename(resource_filename(__name__, 'xsd/510-count-v4-0.xsd'), context)
         
         
-    
+PARSER_CLASSES = {'ca':California}
+STATE_ABBREVIATIONS = sorted(PARSER_CLASSES.keys())
+YEARS = ['2012']
 def StateParserFactory(state, year):
     # Eventually we might need different classes for different years.
-    parser_class = {'ca':California}.get(state.lower())
+    parser_class = PARSER_CLASSES.get(state.lower())
     if not parser_class:
         raise UnknownState(state)
     return parser_class(year)

@@ -17,8 +17,8 @@ all.json - A json file including all of the data
 *.zip - The original california XML files as zipped
 """
 
-import election_parser.ca
 import election_parser.states
+import election_parser.formatter
 import election_parser.xml_parser
 import gflags
 import paramiko 
@@ -34,13 +34,15 @@ from lxml.etree import ElementTree
 from lxml import etree
 import json
 
-STATE = election_parser.states.CA
-
 FLAGS = gflags.FLAGS
 
 gflags.DEFINE_multistring('ssh', [], 'SSH targets to write to')
 gflags.DEFINE_multistring('local', [], 'Local file system paths to write to')
 gflags.DEFINE_multistring('s3', [], 'S3 targets to write to')
+gflags.DEFINE_enum('state', 'ca', election_parser.states.STATE_ABBREVIATIONS, 'Which state to download for')
+gflags.DEFINE_enum('year', '2012', election_parser.states.YEARS, 'Which state to download for')
+gflags.DEFINE_bool('diff', False, 'Compute difference files?')
+gflags.DEFINE_string('cache', os.path.join(os.environ['HOME'], '.election_parser_diff_cache'), 'Path to difference cache')
 
 
 class Writer:
@@ -61,7 +63,6 @@ class LocalWriter(Writer):
         f = open(self.absolute_path(name), "w+")
         f.write(data)
         f.close()
-
     
 
 class SSHWriter(Writer):
@@ -71,9 +72,6 @@ class SSHWriter(Writer):
         self.target, self.path = self.path.split(':', 1)
         self.username, self.hostname = self.target.split('@', 1)
         self.ssh_client = paramiko.SSHClient()
-        print "Hostname: ", self.hostname
-        print "Username: ", self.username
-        print "Path    : ", self.path
         self.ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         self.ssh_client.connect(self.hostname, username=self.username, port=22)
 
@@ -120,10 +118,11 @@ def main(argv, stdout, doc=__doc__):
         print >>sys.stderr, "No S3 support yet, we suck" 
         return 1
 
-    data, original, name = election_parser.fetch(STATE)
+    parser = election_parser.states.StateParserFactory(FLAGS.state, FLAGS.year)
+    data, original, name = parser.fetch()
 
     if not FLAGS.ssh and not FLAGS.s3 and not FLAGS.local:
-        return election_parser.xml_parser.parse(data, STATE)
+        print election_parser.formatter.format(parser.parse(data).next()[1])
         return 0
 
     writer = AggregateWriter(

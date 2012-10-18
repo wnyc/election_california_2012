@@ -13,7 +13,7 @@ import decimal
 class GenericParser:
 
     def __init__(self, year):
-        self.year = year
+        self.year = int(year)
 
     def element_tree_factory(self):
         element_tree = ElementTree().parser
@@ -73,7 +73,6 @@ class GenericParser:
         return contest.findall('./TotalVotes/Selection')
 
     def contests(self, root):
-        print root.find('./')
         return root.find('./Count/Election/Contests').findall('Contest')
 
     def vote_tuple(self, selection):
