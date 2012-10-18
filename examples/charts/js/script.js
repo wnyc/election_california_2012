@@ -1,14 +1,47 @@
+
+    var config;
+
 $(document).ready(function(){
     var statewide_contest_template = Handlebars.compile($("#statewide-contest-template").html());
     var county_results_template = Handlebars.compile($("#county-results-template").html());
     var result_row_template = Handlebars.compile($("#result-row-template").html());
     var result_table_template = Handlebars.compile($("#result-table-template").html());
     var election;
-    var selected_body = "presidential", selected_contest = "ca", selected_county = "";
+    var router;
+    
     var presidential_view, ussenate_view, ushouse_view, casenate_view, caassembly_view, propositions_view;
+    var county_view, assembly_district_view, house_district_view, senate_district_view;
     Handlebars.registerHelper('result_table_template', result_table_template);
     Handlebars.registerHelper('county_results_template', county_results_template);
 
+    var Config = Backbone.Model.extend({
+        // body, contest, county
+        defaults: {
+            body : "presidential",
+            contest: "ca",
+            county: "",
+            map: new google.maps.Map(document.getElementById("map-canvas"), {
+                center: new google.maps.LatLng(38.5, -121.5), // near Sacramento
+                zoom: 5,
+                mapTypeId: google.maps.MapTypeId.ROADMAP,
+                styles: map_styles,
+                scrollwheel: false,
+                streetViewControl: false,
+                mapTypeControl: false
+            }),
+            map_feature_sets: [],
+            redraw_features : function () {
+                _.each(this.map_feature_sets, function (feature_set)
+                {
+                    feature_set.redraw();
+                });
+
+            }
+
+        }
+
+
+    });
 
     var Election = Backbone.Collection.extend({
         // last_updated
@@ -148,6 +181,7 @@ $(document).ready(function(){
 
         
         
+
         
     var StatewideContestView = Backbone.View.extend({
         tagName: "div",
@@ -164,9 +198,71 @@ $(document).ready(function(){
             }
 
             $(this.el).html(statewide_contest_template(json));
-            $('#chart-canvas').html($(this.el)); // Testing code
+            $('#chart-canvas').html($(this.el)); 
+            county_view.render(county_name);
             return this;
         }
+    });
+
+    var CountyView = Backbone.View.extend({
+        tagname: "div",
+        id: "the-map",
+        render: function(county_name)
+        {
+            if(!config.has("county_features"))
+            {
+               $.get("kml/california_counties_use_simplified.kml", function (data) {
+                console.log(data);
+                var features = gmap.load_polygons({
+                    map: config.get("map"),
+                    data: data,
+                    data_type: "kml",
+                    dynamic_unselected_opts: function () {
+                        var body = config.get("body");
+
+                        if (body == "propositions")
+                        {
+                            // Color-code by percent voting yes
+                        }
+
+                        else if (body != "presidential" && body != "ussenate")
+                        {
+                            return {visible: false};
+                        }
+                        return {fillColor: "#999", fillOpacity: 0.7};
+                        
+                    },
+                    dynamic_selected_opts: function () {
+                        var body = config.get("body");
+
+                        if (body == "propositions")
+                        {
+                            // Color-code by percent voting yes
+                        }
+
+                        else if (body != "presidential" && body != "ussenate")
+                        {
+                            return {visible: false};
+                        }
+                        return {fillColor: "#ffcc33", fillOpacity: 0.7};
+
+                    }
+
+               });
+                config.set("county_features", features, {silent: true});
+                var config_features = config.get("map_feature_sets");
+                config_features.push("county_features");
+                config.set("map_feature_sets", config_features, {silent: true});
+                });
+            
+
+            }
+            else
+            {
+                config.redraw_features();
+            }
+        }
+
     });
 
     
@@ -179,11 +275,17 @@ $(document).ready(function(){
            "body/:body/:contest/:county/" : "navto",
            "body/:body/:contest/:county" : "navto"
         },
-
         navto: function(body, contest, county) {
-            selected_body = body || 'presidential';
-            selected_contest = contest || 'ca';
-            selected_county = county || '';
+            config.set({body : body || 'presidential', contest: contest || 'ca', county : county || '' }, {silent: true});
+            this.show (body, contest, county);
+        },
+
+        show: function(body, contest, county) {
+            if (body == "presidential")
+            {
+                presidential_view.render(county);
+
+            }
             if (body == "ussenate")
             {
                 ussenate_view.render(county);
@@ -201,12 +303,11 @@ $(document).ready(function(){
             {
             }
             else {
-                selected_body = 'presidential';
-                presidential_view.render(county);
+                config.set({body : 'presidential'});
 
             }
             $('.button').removeClass('button-selected');
-            $('#' + selected_body + '-button').addClass('button-selected');
+            $('#' + body + '-button').addClass('button-selected');
             
 
         }
@@ -216,23 +317,29 @@ $(document).ready(function(){
 
     $.getJSON("data/foo.json", function(data)
     {
-        var router;
         election = new Election();
         election.parse_bodies(data.bodies);
         presidential_view = new StatewideContestView({model: election.where({name: 'us.president'}).pop().get("contests").at(0)});
         ussenate_view = new StatewideContestView({model: election.where({name: 'us.senate'}).pop().get("contests").at(0)});
+
+
+        county_view = new CountyView();
         router = new Router();
+        config = new Config();
+
+        config.on("change", function(){
+            router.navigate("#body/" + config.get("body") + "/" + config.get("contest") + "/" + config.get("county"), {trigger: true});
+        });
         $('.button').click(function(){
             var which_body = $(this).attr('id').split("-")[0];
-            selected_body = which_body;
-            router.navigate("#body/" + selected_body + "/" + selected_contest + "/" + selected_county, {trigger: true});
+            config.set({body: which_body});
 
         });
 
         if(!Backbone.history.start())
         {
             // By default start with presidential with no specific county
-            router.navigate("#body/presidential", {trigger: true});
+            config.set({body: 'presidential'});
         }
 
 

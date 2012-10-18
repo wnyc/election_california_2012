@@ -18,52 +18,10 @@
 <script type="text/javascript" src="js/handlebars-1.0.0.beta.6.js"></script>
 <script type="text/javascript" src="js/backbone-min.js"></script>
 <script type="text/javascript" src="js/jquery.url.min.js"></script>
-<script src="js/gmap-features.min.js" type="text/javascript" charset="utf-8"></script>
-<script src="js/script.js"></script>
+<script src="js/gmap-features.js" type="text/javascript" charset="utf-8"></script>
+<script src="js/google_baselayer.js" type="text/javascript" charset="utf-8"></script>
+<script src="js/script.js" type="text/javascript" charset="utf-8"></script>
 
-<script>
-
-var map;
-var geocoder;
-var mapdrawn = false;
-var basemap_location = "http://project.wnyc.org/30iss-offshore-oil/embed.html";
-var embedmap_location = "http://project.wnyc.org/30iss-offshore-oil/embed.html";
-
-// get named params from the URL using jquery.url.min.js
-var map_lat = $.url.param("lat");
-var map_lon = $.url.param("lon");
-var map_zoom = $.url.param("zoom");
-var show_center = $.url.param("show_center");
-var is_embed = $.url.param("embed");
-var embed_size = 690;
-
-// set defaults if no named params in URL
-if (map_lat === "") {
-	map_lat = 52.6078;
-}
-
-if (map_lon === "") {
-	map_lon = -116.3660;
-}
-
-if (map_zoom === "") {
-	map_zoom = 3;
-} else {
-	map_zoom = parseInt(map_zoom);
-}
-
-
-// set initial starting point for map
-var centerpoint = new google.maps.LatLng(map_lat, map_lon);
-var MY_MAPTYPE_ID = 'wnyc';
-
-// set fusion table to use
-// var newyork_table = 5387285;
-
-
-
-
-</script>
 
 <!-- Start Google Analytic Code --> 
 <script type="text/javascript">
