@@ -61,8 +61,9 @@ class GenericParser:
             body, condata = self.contest_dict(con)
             key = body[0]
             title = body[1]
-            contests = {}
-            bodies.setdefault(key, {'title': title, 'contests':contests})
+            body_dict = bodies.setdefault(key, {'title': title, 'contests':{}})
+            contests = body_dict['contests']
+
             contests[condata['title']] = condata 
         return parsed_data_root
 
@@ -162,7 +163,7 @@ class GenericParser:
         for reportingunit in contest.findall('./ReportingUnitVotes'):
             unit_id = reportingunit.find('./ReportingUnitIdentifier').attrib['Id']
             unit_title = reportingunit.find('./ReportingUnitIdentifier').text
-            display_id = '_'.join([unit_title, unit_id])
+            unit_display_id = '_'.join([unit_title, unit_id])
 
             geo = dict(state=self.NAME, district=contest_id[6:8])
             report_geo = dict(geo)
@@ -175,7 +176,7 @@ class GenericParser:
             for v in votes.values():
                 v['vote_percent'] = 100.0*v['votes']/vote_total if vote_total else 0
 
-            counties[display_id] = dict(title=unit_title, 
+            counties[unit_display_id] = dict(title=unit_title, 
                                         geo=report_geo, 
                                         votes=votes, 
                                         precincts=precincts)
