@@ -2,6 +2,7 @@ from lxml.etree import ElementTree as ET
 from lxml import etree
 import json
 import datetime
+import decimal
 
 from states import data as state_data
 
@@ -48,14 +49,15 @@ def vote_tuple(selection):
     votes = int(selection.find('./ValidVotes').text)
     return (display_id, votes)
 
-def candidate_dict(selection):
+def candidate_dict(selection, state):
     ##TODO: issue to group Barack Obama votes across party affils?
     candidate = selection.find('./Candidate')
     try:
         ballot_name = candidate.find('./CandidateIdentifier/CandidateName').text
         id = candidate.find('./CandidateIdentifier').attrib['Id']
-        party = candidate.find('./Affiliation/Type').text
-    except:
+        full_party = candidate.find('./Affiliation/Type').text
+        party = state_data[state]['parties'].get(full_party, full_party)
+    except AttributeError:
         ballot_name = candidate.find('./ProposalItem').attrib['ProposalIdentifier']
         id = ''
         party = None
@@ -96,7 +98,7 @@ def contest_dict(contest, state):
     geo = dict(state=state, district=contest_id[6:8])
     candidates = dict()
     for selection in contest.findall('./TotalVotes/Selection'):
-        display_id, candidate = candidate_dict(selection)
+        display_id, candidate = candidate_dict(selection, state)
         candidates[display_id] = candidate
 
     precincts = precinct_dict(contest.find('./TotalVotes'))
@@ -110,7 +112,11 @@ def contest_dict(contest, state):
         votes = dict()
         for selection in reportingunit.findall('./Selection'):
             display_id, num_votes = vote_tuple(selection)
-            votes[display_id] = num_votes
+            votes[display_id] = {'votes':num_votes}
+        vote_total = sum([v['votes'] for v in votes.values()])
+        for v in votes.values():
+            v['vote_percent'] = 100.0*v['votes']/vote_total if vote_total else 0
+        
         counties[display_id] = dict(title=unit_title, 
                                     geo=report_geo, 
                                     votes=votes, 
