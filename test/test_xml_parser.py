@@ -3,6 +3,7 @@
 import election_parser.test
 import election_parser.utils
 from election_parser.xml_parser import parse
+import election_parser.states
 import json
 from pkg_resources import resource_filename
 import unittest2
@@ -47,6 +48,7 @@ class TestTheTestWithoutGoodData(unittest2.TestCase):
 class TestParser(TestTheTestWithoutGoodData):
     def make(self):
         # ZIPFILE is exactly what fetch returns
-        return election_parser.xml_parser.parse(self.incoming_data)
+        parser = election_parser.states.StateParserFactory('ca', 2012)
+        parser.parse(self.incoming_data)
     
     
