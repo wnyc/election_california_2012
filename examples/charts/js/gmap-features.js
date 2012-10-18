@@ -13,7 +13,7 @@ if (!window.typeOf) {
 // ***************************************
 // Just in case there's a console.log hanging around....
 // ***************************************
-if (!window.console) { window.console = { "log": function() {} }; }
+//if (!window.console) { window.console = { "log": function() {} }; }
 
 // ***************************************
 // Set up a Global Namespace
@@ -250,7 +250,7 @@ if (!window.typeOf) {
 // ***************************************
 // Just in case there's a console.log hanging around....
 // ***************************************
-if (!window.console) { window.console = { "log": function() {} }; }
+//if (!window.console) { window.console = { "log": function() {} }; }
 
 
 // ***************************************
@@ -315,7 +315,7 @@ var gmap = gmap || {};
 
 (function() {
 
-    function parseKML(kmlstring) {
+    function parseKML(kmlstring, idselector) {
         var doc = $(kmlstring);
         var features = $.map(doc.find("Placemark"), function(placemark, i) {
             var obj = {};
@@ -327,7 +327,8 @@ var gmap = gmap || {};
                 obj.geometry = $placemark;
             }
 
-            obj.id = $placemark.find("name").text();
+            obj.id = $placemark.find(idselector).text();
+            // Allow you to specify a selector for ID
             obj.properties = {};
             var datapoints = $placemark.find("ExtendedData Data"), $datapoint, val;
             for (var j=0,len=datapoints.length; j<len; j++) {
@@ -347,7 +348,7 @@ var gmap = gmap || {};
         controller = {"selected": null};
 
         if (params.data_type == "kml") {
-            data = parseKML(data);
+            data = parseKML(data, params.idselector || "name");
             //console.log(data);
         } else {
             data = data.features;

@@ -95,3 +95,7 @@ body {
     text-align: right;
 
 }
+.drawer {
+    display: none;
+}
+

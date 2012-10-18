@@ -76,7 +76,7 @@ s.parentNode.insertBefore(ga, s);
 
 <!-- Template for table of results -->
 <script type="text/x-handlebars-template" id="result-table-template">
-    <table class="result-table" id="contest-results">
+    <table class="result-table" class="contest-results">
         <thead>
         <tr>
         <th>Candidate</th>
@@ -113,10 +113,75 @@ s.parentNode.insertBefore(ga, s);
 <!-- incumbent/winner key will go here -->
 </script>
 
+<!-- Template for proposition results -->
+<script type="text/x-handlebars-template" id="proposition-results-template">
+    <div class="contest-basics">
+        <div id="proposition-title">Propositions</div>
+    </div>
+    <table id="proposition-table" class="result-table">
+    <thead>
+    <tr>
+    <th>#</th>
+    <th>Proposition</th>
+    <th>Results</th>
+    </tr>
+    </thead>
+    <tbody>
+    {{#each propositions}}
+        <tr class="top-row">
+            <td>{{number}}</td>
+            <td>{{name}}</td>
+            <td>
+            <table class="proposition-inner-table">
+            {{#each candidates}}
+                <tr>
+                    <td>{{name}}</td>
+                    <td>{{vote_percent}}%</td>
+                <tr>
+            {{/each}}
+            </table>
+            </td>
+
+        </tr>
+        <tr class="drawer description-drawer">
+        </tr>
+        <tr class="drawer county-drawer">
+            {{#if county_results}}
+            {{#with county_results}}
+                <td><b>{{title}}</b><br />County</td>
+                <td>
+                {{#each candidates}}
+                    <tr>
+                        <td>{{name}}</td>
+                        <td>{{vote_percent}}
+                    <tr>
+                {{/each}}
+
+            {{/with}}
+            {{/if}}
+        </tr>
+        <tr class="drawer detailed-results-drawer">
+        <td> </td>
+        <td>TK votes reporting </td>
+        <td class="table-right">
+        <a href="javascript:void(0);" id="hidebutton">hide</a>
+        </td>
+        </tr>
+
+    {{/each}}
+
+    </tbody>
+
+    </table>
+
+
+
+
+</script>
 <!-- Template for County results -->
 
 <script type="text/x-handlebars-template" id="county-results-template">
-    <div class="contest-basics"?
+    <div class="contest-basics">
         <div id="county-title">{{title}}</div>
     </div>
     <div id="county-percent-reporting">
@@ -124,9 +189,7 @@ s.parentNode.insertBefore(ga, s);
         <div class="reporting-detail" id="county-reporting">reporting</div>
     </div>
     <div class="result-table-div">
-        <table class="result-table" id="county-results">
         {{{result_table_template this}}}
-        </table>
     </div>
 </script>
 
