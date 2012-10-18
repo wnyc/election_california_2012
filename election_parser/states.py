@@ -31,6 +31,11 @@ class California(GenericParser, GenericLoader):
     def is_correct_file(self, filename):
         return self.year == 2012 and filename.startswith("X12PG_510.xml")
 
+    def get_ballot_measure_number(self, contestid):
+        if contestid.startswith("1900"):
+            return contestid[-5:]
+        return ''
+
     URL = "http://media.sos.ca.gov/media/X12PG.zip"
 
     class Resolver(etree.Resolver):
