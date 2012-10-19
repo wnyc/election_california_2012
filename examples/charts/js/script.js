@@ -11,7 +11,7 @@ $(document).ready(function(){
     var router;
     
     var presidential_view, ussenate_view, ushouse_view, casenate_view, caassembly_view, propositions_view;
-    var county_map_view, assembly_district_view, house_district_view, senate_district_view;
+    var county_map_view, assembly_map_view, ushouse_map_view, casenate_map_view;
     Handlebars.registerHelper('result_table_template', result_table_template);
     Handlebars.registerHelper('county_results_template', county_results_template);
 
@@ -177,7 +177,7 @@ $(document).ready(function(){
         return new Candidates(_.map(votes, function(vote, candidate_id)
         {
             var new_candidate = candidates.get(candidate_id).clone();
-            new_candidate.set(votes); // Override vote data
+            new_candidate.set(vote); // Override vote data
 
             return new_candidate;
 
@@ -206,6 +206,40 @@ $(document).ready(function(){
 
     });
 
+    var DistrictContestView = Backbone.View.extend({
+        tagName: "div",
+        id: "district-contest-results",
+        render: function(district){
+
+        }
+
+    });
+
+    var AssemblyContestView = DistrictContestView.extend({
+        render: function(district)
+        {
+            assembly_map_view.render(district);
+
+        }
+
+    });
+    var USHouseContestView = DistrictContestView.extend({
+        render: function(district)
+        {
+            ushouse_map_view.render(district);
+
+        }
+
+    });
+    var CASenateContestView = DistrictContestView.extend({
+        render: function(district)
+        {
+            casenate_map_view.render(district);
+
+        }
+
+    });
+
         
         
 
@@ -220,8 +254,10 @@ $(document).ready(function(){
 
             if(!_.isUndefined(county_name))
             {
-                // Not yet implemented -- need to see final version of sample.json
+                j = json;
                 var county_results = json.counties.where({title: county_name});
+                console.log(county_results);
+                console.log(county_name);
                 if (county_results.length > 0)
                 {
                    json.county_results = county_results.pop().toJSON();
@@ -252,7 +288,6 @@ $(document).ready(function(){
             if(!_.isUndefined(county_name))
             {
             }
-            j = json;
 
             $(this.el).html(proposition_results_template(json));
             $('#chart-canvas').html($(this.el));
@@ -276,7 +311,7 @@ $(document).ready(function(){
 
         if (!config.get("showcounties"))
         {
-            return {visible: false};
+            return {visible: false, fillOpacity: 0, strokeWidth:0};
         }
         if (config.get("body") == "propositions")
         {
@@ -284,7 +319,7 @@ $(document).ready(function(){
 
         }
 
-        return {fillColor: "#999", fillOpacity: 0.7, visible: true};
+        return {fillColor: "#999", fillOpacity: 0.7, strokeWidth: 1,visible: true };
     }
     function county_responsive_highlighted_opts () {
         if (!config.get("showcounties"))
@@ -295,6 +330,90 @@ $(document).ready(function(){
         return {fillColor: "#ffcc33", fillOpacity: 0.7, visible: true};
 
     }
+    function district_responsive_unselected_opts (showflag) {
+        if (!config.get(showflag))
+        {
+            return {visible: false, fillOpacity: 0};
+        }
+        return {fillColor: "#999", fillOpacity: 0.7, visible: true};
+
+    }
+    function district_responsive_highlighted_opts (showflag) {
+
+        
+        if(!config.get(showflag))
+        {
+            return {visible: false};
+        }
+        return {fillColor: "#ffcc33", fillOpacity: 0.7, visible: true};
+
+    }
+    var DistrictMapView = Backbone.View.extend({
+        tagname: "div",
+        id: "the-map",
+        render: function(district_id)
+        {
+            if(!config.has(this.feature_name))
+            {
+                var idselector = this.idselector;
+                var showflag = this.showflag;
+                var feature_name = this.feature_name;
+                $.get(this.kml_url, function (data) {
+                    var features = gmap.load_polygons({
+                        map: config.get("map"),
+                        data: data,
+                        data_type: "kml",
+                        idselector: idselector,
+                        highlightCallback : function () {
+                            // Be careful to use right ID
+                            var district = this.id;
+                            config.set({contest: district});
+
+
+                        },
+                        responsive_unselected_opts: function(){return district_responsive_unselected_opts(showflag);},
+
+                        responsive_highlighted_opts: function(){return district_responsive_highlighted_opts(showflag);}
+
+
+                   });
+                    config.set(feature_name, features, {silent: true});
+                    var config_features = config.get("map_feature_sets");
+                    config_features.push(feature_name);
+                    config.set("map_feature_sets", config_features, {silent: true});
+
+                });
+             }
+        }
+    
+    });
+
+    var USHouseMapView = DistrictMapView.extend({
+        feature_name: "house_features",
+        kml_url: "kml/ca_congress_simple0020.kml",
+        showflag: "showushouse",
+        idselector: 'SimpleData[name="FID"]',
+        
+        
+    });
+
+    var AssemblyMapView = DistrictMapView.extend({
+        feature_name : "assembly_features",
+        idselector: 'SimpleData[name="FID"]',
+        showflag: "showassembly",
+        kml_url: "kml/ca_assembly_simple0020.kml"
+
+    });
+    
+    var CASenateMapView = DistrictMapView.extend({
+        feature_name : "senate_features",
+        idselector: 'SimpleData[name="FID"]',
+        showflag: "showsenate",
+        kml_url: "kml/ca_senate_simple0020.kml"
+
+    });
+
+
     var CountyMapView = Backbone.View.extend({
         tagname: "div",
         id: "the-map",
@@ -302,6 +421,9 @@ $(document).ready(function(){
         {
             if(!config.has("county_features"))
             {
+                var config_features = config.get("map_feature_sets");
+                config_features.push("county_features");
+                config.set("map_feature_sets", config_features, {silent: true});
                $.get("kml/california_counties_use_simplified.kml", function (data) {
                 var features = gmap.load_polygons({
                     map: config.get("map"),
@@ -321,9 +443,6 @@ $(document).ready(function(){
 
                });
                 config.set("county_features", features, {silent: true});
-                var config_features = config.get("map_feature_sets");
-                config_features.push("county_features");
-                config.set("map_feature_sets", config_features, {silent: true});
                 });
             
 
@@ -343,8 +462,8 @@ $(document).ready(function(){
            "body/:body/:contest/:county" : "navto"
         },
         navto: function(body, contest, county) {
-            config.set({body : body || 'presidential', contest: contest || 'ca', county : county || '' }, {silent: true});
             this.show (body, contest, county);
+            config.set({body : body || 'presidential', contest: contest || 'ca', county : county || '' }, {silent: true});
         },
 
         show: function(body, contest, county) {
@@ -373,12 +492,37 @@ $(document).ready(function(){
             }
             else if (body == "ushouse")
             {
+                ushouse_view.render(contest);
+                config.set({
+                    showcounties: false,
+                    showassembly: false,
+                    showsenate: false,
+                    showushouse: true
+
+                });
             }
             else if (body == "casenate")
             {
+                casenate_view.render(contest);
+                config.set({
+                    showcounties: false,
+                    showassembly: false,
+                    showsenate: true,
+                    showushouse: false
+
+                });
             }
             else if (body == "caassembly")
             {
+                caassembly_view.render(contest);
+                config.set({body : 'caassembly'});
+                config.set({
+                    showcounties: false,
+                    showassembly: true,
+                    showsenate: false,
+                    showushouse: false
+
+                });
             }
             else if (body == "capropositions")
             {
@@ -419,8 +563,14 @@ $(document).ready(function(){
         ussenate_view = new StatewideContestView({model: election.where({name: 'us.senate'}).pop().get("contests").at(0)});
         propositions_view = new PropositionsView({model: election.where({name: 'ca.propositions'}).pop()});
 
+        caassembly_view = new AssemblyContestView({model: election.where({name: 'ca.assembly'}).pop()});
+        casenate_view = new CASenateContestView({model: election.where({name: 'ca.senate'}).pop()});
+        ushouse_view = new USHouseContestView({model: election.where({name: 'us.house'}).pop()});
 
         county_map_view = new CountyMapView();
+        assembly_map_view = new AssemblyMapView();
+        ushouse_map_view = new USHouseMapView();
+        casenate_map_view = new CASenateMapView();
         router = new Router();
         config = new Config();
 
@@ -428,6 +578,7 @@ $(document).ready(function(){
             router.navigate("#body/" + config.get("body") + "/" + config.get("contest") + "/" + config.get("county"), {trigger: true});
         });
         config.on("change:body", function(){
+            router.navigate("#body/" + config.get("body") + "/" + config.get("contest") + "/" + config.get("county"), {trigger: true});
             config.redraw_features();
 
         });
