@@ -392,7 +392,7 @@ $(document).ready(function(){
                         highlightCallback : function () {
                             // Be careful to use right ID
                             // Districts are zero-indexed in map
-                            var district = 1 + parseInt(this.id, 10);
+                            var district = parseInt(this.id, 10);
                             config.set({contest: district});
 
 
@@ -418,14 +418,14 @@ $(document).ready(function(){
         feature_name: "house_features",
         kml_url: "kml/ca_congress_simple0020.kml",
         showflag: "showushouse",
-        idselector: 'SimpleData[name="FID"]',
+        idselector: 'name',
         
         
     });
 
     var AssemblyMapView = DistrictMapView.extend({
         feature_name : "assembly_features",
-        idselector: 'SimpleData[name="FID"]',
+        idselector: 'name',
         showflag: "showassembly",
         kml_url: "kml/ca_assembly_simple0020.kml"
 
@@ -433,7 +433,7 @@ $(document).ready(function(){
     
     var CASenateMapView = DistrictMapView.extend({
         feature_name : "senate_features",
-        idselector: 'SimpleData[name="FID"]',
+        idselector: 'name',
         showflag: "showsenate",
         kml_url: "kml/ca_senate_simple0020.kml"
 
