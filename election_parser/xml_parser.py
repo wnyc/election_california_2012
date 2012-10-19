@@ -180,11 +180,14 @@ class GenericParser:
                                         geo=report_geo, 
                                         votes=votes, 
                                         precincts=precincts)
-        return (body, {
+        retdict = {
                 'contest_id': contest_id,
                 'title': title,
                 'geo': geo,
-                'measure_number': measure_number,
                 'candidates': candidates,
                 'precincts': precincts,
-                'counties': counties})
+                'counties': counties}
+        if measure_number:
+            retdict['measure_number'] = measure_number
+
+        return (body, retdict)
