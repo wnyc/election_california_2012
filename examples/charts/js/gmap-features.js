@@ -13,7 +13,7 @@ if (!window.typeOf) {
 // ***************************************
 // Just in case there's a console.log hanging around....
 // ***************************************
-//if (!window.console) { window.console = { "log": function() {} }; }
+if (!window.console) { window.console = { "log": function() {} }; }
 
 // ***************************************
 // Set up a Global Namespace
@@ -250,7 +250,7 @@ if (!window.typeOf) {
 // ***************************************
 // Just in case there's a console.log hanging around....
 // ***************************************
-//if (!window.console) { window.console = { "log": function() {} }; }
+if (!window.console) { window.console = { "log": function() {} }; }
 
 
 // ***************************************
@@ -303,7 +303,6 @@ gmap.geom.ParseKMLMultiPolygon = function(data) {
             });
             return [path];
         });
-        //console.log(lines.length);
         return [linearrings];
     });
     return polys;
@@ -349,7 +348,6 @@ var gmap = gmap || {};
 
         if (params.data_type == "kml") {
             data = parseKML(data, params.idselector || "name");
-            //console.log(data);
         } else {
             data = data.features;
         }

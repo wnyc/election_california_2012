@@ -36,7 +36,7 @@ $(document).ready(function(){
 
         defaults: {
             body : "",
-            contest: "1",
+            contest: "",
             county: "",
             showcounties: false,
             showassembly: false,
@@ -93,6 +93,7 @@ $(document).ready(function(){
                     geo: contest.geo,
                     precincts_total: contest.precincts.total,
                     precincts_reporting: contest.precincts.reporting,
+                    measure_number: contest.measure_number,
                     precincts_reporting_percent: contest.precincts.reporting_percent
                 });
                 newcontest.parse_candidates(contest.candidates);
@@ -123,6 +124,11 @@ $(document).ready(function(){
                 {
                     newcontest.set('counties', null);
                 }
+                var candidates = newcontest.get("candidates");
+                // Remove third-party candidates
+                // Consolidating them as other
+
+                candidates.remove(candidates.rest(3));
                 the_contests.add(newcontest);
             });
             the_body.set("contests", the_contests);
@@ -135,10 +141,12 @@ $(document).ready(function(){
         // Name 
         // Longname
         // Geo
+        // Body
         // Candidates
         // Precincts_reporting
         // Precincts_total
         // Precincts_reporting_percent
+        // measure_number
         parse_candidates : function(candidates){
             var the_contest = this;
             var the_candidates = new Candidates();
@@ -148,6 +156,22 @@ $(document).ready(function(){
                 the_candidates.add(candidate);
 
             });
+            if(the_candidates.size() > 2)
+            {
+                // Add 'Other' sum for neither rep/dem
+                // And discard individual third-party candidates
+                // We could make exceptions if we hear of any important ones
+                var other_candidate = create_other_candidate(the_candidates);
+                if (other_candidate)
+                {
+                    the_candidates.add(other_candidate);
+                }
+
+
+                
+            }
+            
+
             the_contest.set('candidates', the_candidates);
 
         }
@@ -173,9 +197,37 @@ $(document).ready(function(){
         model : County
     });
 
+    function create_other_candidate(candidates)
+    {
+            var other_candidate = 
+                new Candidate({
+                    name: "Other",
+                    party: "---",
+                    last_name: "",
+                    ballot_name: "Other",
+                    id: "other"
+                });
+            var total_votes = 0;
+            var total_vote_percent = 0;
+            candidates.each(function(candidate){
+                var party = candidate.get("party");
+                if(party != 'Dem' && party != 'Rep')
+                {
+                    total_votes += parseInt(candidate.get("votes"), 10);
+                    total_vote_percent += parseFloat(candidate.get("vote_percent"));
+                }
+            });
+            other_candidate.set({votes: total_votes, vote_percent: total_vote_percent.toFixed(1)});
+            if(total_votes == 0)
+            {
+                return null;
+            }
+            return other_candidate;
+
+    }
     function county_votes_to_candidates(votes, candidates)
     {
-        return new Candidates(_.map(votes, function(vote, candidate_id)
+        var newcandidates = new Candidates(_.map(votes, function(vote, candidate_id)
         {
             var new_candidate = candidates.get(candidate_id).clone();
             new_candidate.set(vote); // Override vote data
@@ -185,6 +237,19 @@ $(document).ready(function(){
             
 
         }));
+
+        if (newcandidates.size() > 2)
+        {
+            var othercandidate = create_other_candidate(newcandidates);
+            if (othercandidate)
+            {
+                newcandidates.add(othercandidate);
+            }
+        }
+        
+
+        return newcandidates.remove(newcandidates.rest(3));
+
     }
     var Candidate = Backbone.Model.extend({
         // name
@@ -192,6 +257,7 @@ $(document).ready(function(){
         // ballot_name
         // last_name
         // votes
+        // party
         // vote_percent
 
     });
@@ -216,12 +282,19 @@ $(document).ready(function(){
             district = parseInt(district, 10);
             m = view.model;
             var contest = m.get("contests").find(function(c){return c.get("geo").district == district;});
-            var json = contest.toJSON();
-            json.candidates = json.candidates.toJSON();
-            json.body_title = title;
+            if(!_.isUndefined(contest))
+            {
+                var json = contest.toJSON();
+                json.candidates = json.candidates.toJSON();
+                json.body_title = title;
 
 
-            $(this.el).html(district_contest_template(json));
+                $(this.el).html(district_contest_template(json));
+            }
+            else
+            {
+                // Do the right thing when there's no valid race
+            }
             $('#chart-canvas').html($(this.el)); 
 
         }
@@ -609,11 +682,11 @@ $(document).ready(function(){
         router = new Router();
         config = new Config();
 
-        config.on("change", function(){
+        config.on("change:contest change:county", function(){
             router.navigate("#body/" + config.get("body") + "/" + config.get("contest") + "/" + config.get("county"), {trigger: true});
         });
         config.on("change:body", function(){
-            router.navigate("#body/" + config.get("body") + "/" + config.get("contest") + "/" + config.get("county"), {trigger: true});
+            router.navigate("#body/" + config.get("body"), {trigger: true});
             config.redraw_features();
 
         });
