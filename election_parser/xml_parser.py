@@ -122,7 +122,7 @@ class GenericParser:
         except:
             vote_percent = None #TODO
 
-        incumbent_field = selection.findall("./Affiliation[@ID='Incumbent']")
+        incumbent_field = selection.findall("./AffiliationIdentifier[@Id='Incumbent']")
         if incumbent_field:
             incumbent = True
         else:
