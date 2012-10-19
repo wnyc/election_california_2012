@@ -122,12 +122,19 @@ class GenericParser:
         except:
             vote_percent = None #TODO
 
+        incumbent_field = selection.findall("./Affiliation[@ID='Incumbent']")
+        if incumbent_field:
+            incumbent = True
+        else:
+            incumbent = False
+
         return (display_id, {'ballot_name':ballot_name,
             'id': display_id,
             'ballot_name': ballot_name,
             'party': party,
             'last_name':last_name,
             'votes' : votes,
+            'incumbent' : incumbent,
             'vote_percent' : vote_percent,
             })
 
@@ -160,14 +167,15 @@ class GenericParser:
 
         precincts = self.precinct_dict(contest.find('./TotalVotes'))
         counties = dict()
+        geo = dict(state=self.NAME, district=contest_id[6:8])
         for reportingunit in contest.findall('./ReportingUnitVotes'):
             unit_id = reportingunit.find('./ReportingUnitIdentifier').attrib['Id']
             unit_title = reportingunit.find('./ReportingUnitIdentifier').text
             unit_display_id = '_'.join([unit_title, unit_id])
 
-            geo = dict(state=self.NAME, district=contest_id[6:8])
-            report_geo = dict(geo)
-            precincts = self.precinct_dict(reportingunit)
+            unit_geo = dict(state=self.NAME, fips=self.FIPS[unit_title])
+            unit_geo = dict(unit_geo)
+            unit_precincts = self.precinct_dict(reportingunit)
             votes = dict()
             for selection in reportingunit.findall('./Selection'):
                 display_id, num_votes = self.vote_tuple(selection)
@@ -177,9 +185,9 @@ class GenericParser:
                 v['vote_percent'] = 100.0*v['votes']/vote_total if vote_total else 0
 
             counties[unit_display_id] = dict(title=unit_title, 
-                                        geo=report_geo, 
+                                        geo=unit_geo, 
                                         votes=votes, 
-                                        precincts=precincts)
+                                        precincts=unit_precincts)
         retdict = {
                 'contest_id': contest_id,
                 'title': title,

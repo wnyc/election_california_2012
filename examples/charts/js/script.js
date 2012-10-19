@@ -600,7 +600,7 @@ $(document).ready(function(){
 
         caassembly_view = new AssemblyContestView({model: election.where({name: 'ca.assembly'}).pop()});
         casenate_view = new CASenateContestView({model: election.where({name: 'ca.senate'}).pop()});
-        ushouse_view = new USHouseContestView({model: election.where({name: 'us.congress'}).pop()});
+        ushouse_view = new USHouseContestView({model: election.where({name: 'us.house'}).pop()});
 
         county_map_view = new CountyMapView();
         assembly_map_view = new AssemblyMapView();

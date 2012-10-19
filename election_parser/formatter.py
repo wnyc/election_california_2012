@@ -40,7 +40,7 @@ class DecimalEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
             
-LowPrecisionConverter = Converter(float=lambda x:Decimal("%0.2f" % x))
+LowPrecisionConverter = Converter(float=lambda x:Decimal("%0.1f" % x))
 
 def low_precision_dumps(obj):
     return json.dumps(LowPrecisionConverter(obj), default=float)
