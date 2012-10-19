@@ -13,7 +13,6 @@
 <script type="text/javascript" src="http://maps.google.com/maps/api/js?v=3.4&sensor=false"></script>
 
 <script type="text/javascript" src="js/jquery-1.7.2.min.js"></script>
-<script type="text/javascript" src="js/gmap-features.min.js"></script>
 <script type="text/javascript" src="js/underscore-min.js"></script>
 <script type="text/javascript" src="js/handlebars-1.0.0.beta.6.js"></script>
 <script type="text/javascript" src="js/backbone-min.js"></script>
@@ -135,7 +134,7 @@ s.parentNode.insertBefore(ga, s);
             <table class="proposition-inner-table">
             {{#each candidates}}
                 <tr>
-                    <td>{{name}}</td>
+                    <td>{{ballot_name}}</td>
                     <td>{{vote_percent}}%</td>
                 <tr>
             {{/each}}
@@ -193,6 +192,21 @@ s.parentNode.insertBefore(ga, s);
     </div>
 </script>
 
+<!-- Template for US House/State Senate/State Assembly -->
+<script type="text/x-handlebars-template" id="district-contest-template">
+    <div class ="contest-basics">
+        <div id="contest-title">{{body_title}}</div>
+        <div id="contest-district">District {{geo.district}}</div>
+    </div>
+    <div id="contest-percent-reporting">
+        <div class="percent-reporting" id="contest-percent">{{precincts_reporting_percent}}%</div>
+        <div class="reporting-detail" id="contest-reporting">reporting</div>
+    </div>
+    <div class="result-table-div">
+        {{{result_table_template this}}}
+    </div>
+</script>
+        
 <!-- Template for president / US Senate -->
 <script type="text/x-handlebars-template" id="statewide-contest-template">
     <div class="contest-basics">

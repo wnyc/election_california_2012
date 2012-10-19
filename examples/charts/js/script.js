@@ -3,6 +3,7 @@
 
 $(document).ready(function(){
     var statewide_contest_template = Handlebars.compile($("#statewide-contest-template").html());
+    var district_contest_template = Handlebars.compile($("#district-contest-template").html());
     var county_results_template = Handlebars.compile($("#county-results-template").html());
     var result_row_template = Handlebars.compile($("#result-row-template").html());
     var result_table_template = Handlebars.compile($("#result-table-template").html());
@@ -35,13 +36,13 @@ $(document).ready(function(){
 
         defaults: {
             body : "",
-            contest: "ca",
+            contest: "1",
             county: "",
             showcounties: false,
             showassembly: false,
             showsenate: false,
             showushouse: false,
-            map: new google.maps.Map(document.getElementById("map-canvas"), {
+            map: typeof google != "undefined" ? new google.maps.Map(document.getElementById("map-canvas"), {
                 center: new google.maps.LatLng(38.5, -121.5), // near Sacramento
                 zoom: 5,
                 mapTypeId: google.maps.MapTypeId.ROADMAP,
@@ -49,7 +50,7 @@ $(document).ready(function(){
                 scrollwheel: false,
                 streetViewControl: false,
                 mapTypeControl: false
-            }),
+            }) : null,
             map_feature_sets: [],
 
         }
@@ -209,7 +210,19 @@ $(document).ready(function(){
     var DistrictContestView = Backbone.View.extend({
         tagName: "div",
         id: "district-contest-results",
-        render: function(district){
+        base_render : function(view){
+            var title = view.model.get("title");
+            var district = config.get("contest") || 1;
+            district = parseInt(district, 10);
+            m = view.model;
+            var contest = m.get("contests").find(function(c){return c.get("geo").district == district;});
+            var json = contest.toJSON();
+            json.candidates = json.candidates.toJSON();
+            json.body_title = title;
+
+
+            $(this.el).html(district_contest_template(json));
+            $('#chart-canvas').html($(this.el)); 
 
         }
 
@@ -218,6 +231,7 @@ $(document).ready(function(){
     var AssemblyContestView = DistrictContestView.extend({
         render: function(district)
         {
+            this.base_render(this);
             assembly_map_view.render(district);
 
         }
@@ -226,6 +240,7 @@ $(document).ready(function(){
     var USHouseContestView = DistrictContestView.extend({
         render: function(district)
         {
+            this.base_render(this);
             ushouse_map_view.render(district);
 
         }
@@ -234,6 +249,7 @@ $(document).ready(function(){
     var CASenateContestView = DistrictContestView.extend({
         render: function(district)
         {
+            this.base_render(this);
             casenate_map_view.render(district);
 
         }
@@ -256,8 +272,6 @@ $(document).ready(function(){
             {
                 j = json;
                 var county_results = json.counties.where({title: county_name});
-                console.log(county_results);
-                console.log(county_name);
                 if (county_results.length > 0)
                 {
                    json.county_results = county_results.pop().toJSON();
@@ -281,13 +295,20 @@ $(document).ready(function(){
             json.body_title = this.model.get("title");
             json.propositions = this.model.get("contests").toJSON();
             _.each(json.propositions, function(proposition) {
+                // Need to compute percentages too
+                // Always two vote types: Yes and No
                 proposition.candidates = proposition.candidates.toJSON();
+                var total = proposition.candidates[0].votes + proposition.candidates[1].votes;
+                proposition.candidates[0].vote_percent = (100 * proposition.candidates[0].votes / total).toFixed(2);
+                proposition.candidates[1].vote_percent = (100 * proposition.candidates[1].votes / total).toFixed(2);
+                
 
             });
 
             if(!_.isUndefined(county_name))
             {
             }
+            console.log(json);
 
             $(this.el).html(proposition_results_template(json));
             $('#chart-canvas').html($(this.el));
@@ -353,6 +374,10 @@ $(document).ready(function(){
         id: "the-map",
         render: function(district_id)
         {
+            if (_.isNull(config.get("map")))
+            {
+                return;
+            }
             if(!config.has(this.feature_name))
             {
                 var idselector = this.idselector;
@@ -366,7 +391,8 @@ $(document).ready(function(){
                         idselector: idselector,
                         highlightCallback : function () {
                             // Be careful to use right ID
-                            var district = this.id;
+                            // Districts are zero-indexed in map
+                            var district = 1 + parseInt(this.id, 10);
                             config.set({contest: district});
 
 
@@ -419,6 +445,10 @@ $(document).ready(function(){
         id: "the-map",
         render: function(county_name)
         {
+            if (_.isNull(config.get("map")))
+            {
+                return;
+            }
             if(!config.has("county_features"))
             {
                 var config_features = config.get("map_feature_sets");
@@ -462,8 +492,8 @@ $(document).ready(function(){
            "body/:body/:contest/:county" : "navto"
         },
         navto: function(body, contest, county) {
+            config.set({body : body || 'presidential', contest: contest || '1', county : county || '' }, {silent: true});
             this.show (body, contest, county);
-            config.set({body : body || 'presidential', contest: contest || 'ca', county : county || '' }, {silent: true});
         },
 
         show: function(body, contest, county) {
@@ -474,7 +504,8 @@ $(document).ready(function(){
                     showcounties: true,
                     showassembly: false,
                     showsenate: false,
-                    showushouse: false
+                    showushouse: false,
+                    contest: '1'
 
                 });
 
@@ -486,7 +517,8 @@ $(document).ready(function(){
                     showcounties: true,
                     showassembly: false,
                     showsenate: false,
-                    showushouse: false
+                    showushouse: false,
+                    contest: '1'
 
                 });
             }
@@ -497,7 +529,8 @@ $(document).ready(function(){
                     showcounties: false,
                     showassembly: false,
                     showsenate: false,
-                    showushouse: true
+                    showushouse: true,
+                    county: ''
 
                 });
             }
@@ -508,7 +541,8 @@ $(document).ready(function(){
                     showcounties: false,
                     showassembly: false,
                     showsenate: true,
-                    showushouse: false
+                    showushouse: false,
+                    county: ''
 
                 });
             }
@@ -520,7 +554,8 @@ $(document).ready(function(){
                     showcounties: false,
                     showassembly: true,
                     showsenate: false,
-                    showushouse: false
+                    showushouse: false,
+                    county: ''
 
                 });
             }
@@ -559,13 +594,13 @@ $(document).ready(function(){
     {
         election = new Election();
         election.parse_bodies(data.bodies);
-        presidential_view = new StatewideContestView({model: election.where({name: 'us.president'}).pop().get("contests").at(0)});
-        ussenate_view = new StatewideContestView({model: election.where({name: 'us.senate'}).pop().get("contests").at(0)});
+        presidential_view = new StatewideContestView({model: election.where({name: 'us.president'}).pop().get("contests").first()});
+        ussenate_view = new StatewideContestView({model: election.where({name: 'us.senate'}).pop().get("contests").first()});
         propositions_view = new PropositionsView({model: election.where({name: 'ca.propositions'}).pop()});
 
         caassembly_view = new AssemblyContestView({model: election.where({name: 'ca.assembly'}).pop()});
         casenate_view = new CASenateContestView({model: election.where({name: 'ca.senate'}).pop()});
-        ushouse_view = new USHouseContestView({model: election.where({name: 'us.house'}).pop()});
+        ushouse_view = new USHouseContestView({model: election.where({name: 'us.congress'}).pop()});
 
         county_map_view = new CountyMapView();
         assembly_map_view = new AssemblyMapView();
