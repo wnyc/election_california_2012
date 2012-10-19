@@ -78,6 +78,8 @@ class California(GenericParser, GenericLoader):
         "Yuba":"06115"
 
     }
+    SHOW_COUNTY_RACES = set(["us.president","us.senate","ca.propositions"])
+
     BODY_MAPPER = {
         '0100': ["us.president", "U.S. President"],
         '1000': ["us.senate", "U.S. Senate"],

@@ -193,9 +193,10 @@ class GenericParser:
                 'title': title,
                 'geo': geo,
                 'candidates': candidates,
-                'precincts': precincts,
-                'counties': counties}
+                'precincts': precincts}
         if measure_number:
             retdict['measure_number'] = measure_number
+        if body[0] in self.SHOW_COUNTY_RACES:
+            retdict['counties'] = counties
 
         return (body, retdict)
