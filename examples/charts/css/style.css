@@ -40,6 +40,8 @@ body {
 #map-canvas {
     float: left;
     width: 350px;
+    margin-left: 5px;
+    height: 600px;
 
 }
 
@@ -93,3 +95,7 @@ body {
     text-align: right;
 
 }
+.drawer {
+    display: none;
+}
+

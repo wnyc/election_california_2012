@@ -1,14 +1,61 @@
+
+    var config;
+
 $(document).ready(function(){
     var statewide_contest_template = Handlebars.compile($("#statewide-contest-template").html());
     var county_results_template = Handlebars.compile($("#county-results-template").html());
     var result_row_template = Handlebars.compile($("#result-row-template").html());
     var result_table_template = Handlebars.compile($("#result-table-template").html());
+    var proposition_results_template = Handlebars.compile($("#proposition-results-template").html());
     var election;
-    var selected_body = "presidential", selected_contest = "ca", selected_county = "";
+    var router;
+    
     var presidential_view, ussenate_view, ushouse_view, casenate_view, caassembly_view, propositions_view;
+    var county_map_view, assembly_map_view, ushouse_map_view, casenate_map_view;
     Handlebars.registerHelper('result_table_template', result_table_template);
     Handlebars.registerHelper('county_results_template', county_results_template);
 
+    var Config = Backbone.Model.extend({
+        // body, contest, county
+        redraw_features : function () {
+            var cfg = this;
+            var feature_sets = this.get("map_feature_sets");
+            _.each(feature_sets, function(feature_set_name)
+            {
+                var feature_set = cfg.get(feature_set_name);
+                
+                _.each(feature_set, function(feature)
+                {
+                    feature.redraw();
+
+                });
+            });
+            
+        },
+
+        defaults: {
+            body : "",
+            contest: "ca",
+            county: "",
+            showcounties: false,
+            showassembly: false,
+            showsenate: false,
+            showushouse: false,
+            map: new google.maps.Map(document.getElementById("map-canvas"), {
+                center: new google.maps.LatLng(38.5, -121.5), // near Sacramento
+                zoom: 5,
+                mapTypeId: google.maps.MapTypeId.ROADMAP,
+                styles: map_styles,
+                scrollwheel: false,
+                streetViewControl: false,
+                mapTypeControl: false
+            }),
+            map_feature_sets: [],
+
+        }
+
+
+    });
 
     var Election = Backbone.Collection.extend({
         // last_updated
@@ -57,7 +104,7 @@ $(document).ready(function(){
                             name: name,
                             title: county.title,
                             geo: county.geo,
-                            votes: county.votes,
+                            candidates: county_votes_to_candidates(county.votes, newcontest.get("candidates")),
                             precincts_total: county.precincts.total,
                             precincts_reporting: county.precincts.reporting,
                             precincts_reporting_percent: county.precincts.reporting_percent
@@ -125,6 +172,19 @@ $(document).ready(function(){
         model : County
     });
 
+    function county_votes_to_candidates(votes, candidates)
+    {
+        return new Candidates(_.map(votes, function(vote, candidate_id)
+        {
+            var new_candidate = candidates.get(candidate_id).clone();
+            new_candidate.set(vote); // Override vote data
+
+            return new_candidate;
+
+            
+
+        }));
+    }
     var Candidate = Backbone.Model.extend({
         // name
         // id
@@ -146,8 +206,43 @@ $(document).ready(function(){
 
     });
 
+    var DistrictContestView = Backbone.View.extend({
+        tagName: "div",
+        id: "district-contest-results",
+        render: function(district){
+
+        }
+
+    });
+
+    var AssemblyContestView = DistrictContestView.extend({
+        render: function(district)
+        {
+            assembly_map_view.render(district);
+
+        }
+
+    });
+    var USHouseContestView = DistrictContestView.extend({
+        render: function(district)
+        {
+            ushouse_map_view.render(district);
+
+        }
+
+    });
+    var CASenateContestView = DistrictContestView.extend({
+        render: function(district)
+        {
+            casenate_map_view.render(district);
+
+        }
+
+    });
+
         
         
+
         
     var StatewideContestView = Backbone.View.extend({
         tagName: "div",
@@ -159,14 +254,201 @@ $(document).ready(function(){
 
             if(!_.isUndefined(county_name))
             {
-                // Not yet implemented -- need to see final version of sample.json
-                var county_results = json.counties.where({title: county_name}).pop();
+                j = json;
+                var county_results = json.counties.where({title: county_name});
+                console.log(county_results);
+                console.log(county_name);
+                if (county_results.length > 0)
+                {
+                   json.county_results = county_results.pop().toJSON();
+                   json.county_results.candidates = json.county_results.candidates.toJSON();
+                }
+
             }
 
             $(this.el).html(statewide_contest_template(json));
-            $('#chart-canvas').html($(this.el)); // Testing code
+            $('#chart-canvas').html($(this.el)); 
+            county_map_view.render(county_name);
             return this;
         }
+    });
+
+    var PropositionsView = Backbone.View.extend({
+        tagName: "div",
+        id: "proposition-contest-results",
+        render: function(county_name) {
+            var json = {};
+            json.body_title = this.model.get("title");
+            json.propositions = this.model.get("contests").toJSON();
+            _.each(json.propositions, function(proposition) {
+                proposition.candidates = proposition.candidates.toJSON();
+
+            });
+
+            if(!_.isUndefined(county_name))
+            {
+            }
+
+            $(this.el).html(proposition_results_template(json));
+            $('#chart-canvas').html($(this.el));
+            county_map_view.render(county_name);
+
+            
+            
+
+        }
+
+    });
+
+    function county_responsive_unselected_opts () {
+        if(config.get("county") == this.id)
+        {
+            
+            // Unselect yourself on mouseout
+            config.set({county: ''});
+
+        }
+
+        if (!config.get("showcounties"))
+        {
+            return {visible: false, fillOpacity: 0, strokeWidth:0};
+        }
+        if (config.get("body") == "propositions")
+        {
+        
+
+        }
+
+        return {fillColor: "#999", fillOpacity: 0.7, strokeWidth: 1,visible: true };
+    }
+    function county_responsive_highlighted_opts () {
+        if (!config.get("showcounties"))
+        {
+            return {visible: false};
+        }
+
+        return {fillColor: "#ffcc33", fillOpacity: 0.7, visible: true};
+
+    }
+    function district_responsive_unselected_opts (showflag) {
+        if (!config.get(showflag))
+        {
+            return {visible: false, fillOpacity: 0};
+        }
+        return {fillColor: "#999", fillOpacity: 0.7, visible: true};
+
+    }
+    function district_responsive_highlighted_opts (showflag) {
+
+        
+        if(!config.get(showflag))
+        {
+            return {visible: false};
+        }
+        return {fillColor: "#ffcc33", fillOpacity: 0.7, visible: true};
+
+    }
+    var DistrictMapView = Backbone.View.extend({
+        tagname: "div",
+        id: "the-map",
+        render: function(district_id)
+        {
+            if(!config.has(this.feature_name))
+            {
+                var idselector = this.idselector;
+                var showflag = this.showflag;
+                var feature_name = this.feature_name;
+                $.get(this.kml_url, function (data) {
+                    var features = gmap.load_polygons({
+                        map: config.get("map"),
+                        data: data,
+                        data_type: "kml",
+                        idselector: idselector,
+                        highlightCallback : function () {
+                            // Be careful to use right ID
+                            var district = this.id;
+                            config.set({contest: district});
+
+
+                        },
+                        responsive_unselected_opts: function(){return district_responsive_unselected_opts(showflag);},
+
+                        responsive_highlighted_opts: function(){return district_responsive_highlighted_opts(showflag);}
+
+
+                   });
+                    config.set(feature_name, features, {silent: true});
+                    var config_features = config.get("map_feature_sets");
+                    config_features.push(feature_name);
+                    config.set("map_feature_sets", config_features, {silent: true});
+
+                });
+             }
+        }
+    
+    });
+
+    var USHouseMapView = DistrictMapView.extend({
+        feature_name: "house_features",
+        kml_url: "kml/ca_congress_simple0020.kml",
+        showflag: "showushouse",
+        idselector: 'SimpleData[name="FID"]',
+        
+        
+    });
+
+    var AssemblyMapView = DistrictMapView.extend({
+        feature_name : "assembly_features",
+        idselector: 'SimpleData[name="FID"]',
+        showflag: "showassembly",
+        kml_url: "kml/ca_assembly_simple0020.kml"
+
+    });
+    
+    var CASenateMapView = DistrictMapView.extend({
+        feature_name : "senate_features",
+        idselector: 'SimpleData[name="FID"]',
+        showflag: "showsenate",
+        kml_url: "kml/ca_senate_simple0020.kml"
+
+    });
+
+
+    var CountyMapView = Backbone.View.extend({
+        tagname: "div",
+        id: "the-map",
+        render: function(county_name)
+        {
+            if(!config.has("county_features"))
+            {
+                var config_features = config.get("map_feature_sets");
+                config_features.push("county_features");
+                config.set("map_feature_sets", config_features, {silent: true});
+               $.get("kml/california_counties_use_simplified.kml", function (data) {
+                var features = gmap.load_polygons({
+                    map: config.get("map"),
+                    data: data,
+                    data_type: "kml",
+                    idselector: 'Data[name="NAME00"] value',
+                    highlightCallback : function () {
+                        var countyname = this.id;
+                        config.set({county: countyname});
+
+
+                    },
+                    responsive_unselected_opts: county_responsive_unselected_opts,
+
+                    responsive_highlighted_opts: county_responsive_highlighted_opts
+
+
+               });
+                config.set("county_features", features, {silent: true});
+                });
+            
+
+            }
+        }
+
     });
 
     
@@ -179,34 +461,93 @@ $(document).ready(function(){
            "body/:body/:contest/:county/" : "navto",
            "body/:body/:contest/:county" : "navto"
         },
-
         navto: function(body, contest, county) {
-            selected_body = body || 'presidential';
-            selected_contest = contest || 'ca';
-            selected_county = county || '';
+            this.show (body, contest, county);
+            config.set({body : body || 'presidential', contest: contest || 'ca', county : county || '' }, {silent: true});
+        },
+
+        show: function(body, contest, county) {
+            if (body == "presidential")
+            {
+                presidential_view.render(county);
+                config.set({
+                    showcounties: true,
+                    showassembly: false,
+                    showsenate: false,
+                    showushouse: false
+
+                });
+
+            }
             if (body == "ussenate")
             {
                 ussenate_view.render(county);
+                config.set({
+                    showcounties: true,
+                    showassembly: false,
+                    showsenate: false,
+                    showushouse: false
+
+                });
             }
             else if (body == "ushouse")
             {
+                ushouse_view.render(contest);
+                config.set({
+                    showcounties: false,
+                    showassembly: false,
+                    showsenate: false,
+                    showushouse: true
+
+                });
             }
             else if (body == "casenate")
             {
+                casenate_view.render(contest);
+                config.set({
+                    showcounties: false,
+                    showassembly: false,
+                    showsenate: true,
+                    showushouse: false
+
+                });
             }
             else if (body == "caassembly")
             {
+                caassembly_view.render(contest);
+                config.set({body : 'caassembly'});
+                config.set({
+                    showcounties: false,
+                    showassembly: true,
+                    showsenate: false,
+                    showushouse: false
+
+                });
             }
             else if (body == "capropositions")
             {
+                propositions_view.render(county);
+                config.set({
+                    showcounties: true,
+                    showassembly: false,
+                    showsenate: false,
+                    showushouse: false
+
+                });
             }
             else {
-                selected_body = 'presidential';
-                presidential_view.render(county);
+                config.set({body : 'presidential'});
+                config.set({
+                    showcounties: true,
+                    showassembly: false,
+                    showsenate: false,
+                    showushouse: false
+
+                });
 
             }
             $('.button').removeClass('button-selected');
-            $('#' + selected_body + '-button').addClass('button-selected');
+            $('#' + body + '-button').addClass('button-selected');
             
 
         }
@@ -216,27 +557,44 @@ $(document).ready(function(){
 
     $.getJSON("data/foo.json", function(data)
     {
-        var router;
         election = new Election();
         election.parse_bodies(data.bodies);
         presidential_view = new StatewideContestView({model: election.where({name: 'us.president'}).pop().get("contests").at(0)});
         ussenate_view = new StatewideContestView({model: election.where({name: 'us.senate'}).pop().get("contests").at(0)});
+        propositions_view = new PropositionsView({model: election.where({name: 'ca.propositions'}).pop()});
+
+        caassembly_view = new AssemblyContestView({model: election.where({name: 'ca.assembly'}).pop()});
+        casenate_view = new CASenateContestView({model: election.where({name: 'ca.senate'}).pop()});
+        ushouse_view = new USHouseContestView({model: election.where({name: 'us.house'}).pop()});
+
+        county_map_view = new CountyMapView();
+        assembly_map_view = new AssemblyMapView();
+        ushouse_map_view = new USHouseMapView();
+        casenate_map_view = new CASenateMapView();
         router = new Router();
+        config = new Config();
+
+        config.on("change", function(){
+            router.navigate("#body/" + config.get("body") + "/" + config.get("contest") + "/" + config.get("county"), {trigger: true});
+        });
+        config.on("change:body", function(){
+            router.navigate("#body/" + config.get("body") + "/" + config.get("contest") + "/" + config.get("county"), {trigger: true});
+            config.redraw_features();
+
+        });
         $('.button').click(function(){
             var which_body = $(this).attr('id').split("-")[0];
-            selected_body = which_body;
-            router.navigate("#body/" + selected_body + "/" + selected_contest + "/" + selected_county, {trigger: true});
+            config.set({body: which_body});
 
         });
 
         if(!Backbone.history.start())
         {
             // By default start with presidential with no specific county
-            router.navigate("#body/presidential", {trigger: true});
+            config.set({body: 'presidential'});
         }
 
 
-        // TESTING Code
 
     });
 

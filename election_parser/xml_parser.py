@@ -61,8 +61,9 @@ class GenericParser:
             body, condata = self.contest_dict(con)
             key = body[0]
             title = body[1]
-            contests = {}
-            bodies.setdefault(key, {'title': title, 'contests':contests})
+            body_dict = bodies.setdefault(key, {'title': title, 'contests':{}})
+            contests = body_dict['contests']
+
             contests[condata['title']] = condata 
         return parsed_data_root
 
@@ -80,10 +81,16 @@ class GenericParser:
         try:
             ballot_name = candidate.find('./CandidateIdentifier/CandidateName').text
             id = candidate.find('./CandidateIdentifier').attrib['Id']
+            ballot_measure = False
         except:
-            ballot_name = candidate.find('./ProposalItem').attrib['ProposalIdentifier']
-            id = ''
-        last_name = ballot_name.split().pop()
+            # Ballot Measure
+            ballot_measure = True
+            ballot_name = candidate.find('./ProposalItem').attrib['ReferendumOptionIdentifier']
+            id = ballot_name
+        if not ballot_measure:
+            last_name = ballot_name.split().pop()
+        else:
+            last_name = ""
         display_id = '_'.join([last_name.lower(), id])
         votes = int(selection.find('./ValidVotes').text)
         return (display_id, votes)
@@ -96,11 +103,17 @@ class GenericParser:
             id = candidate.find('./CandidateIdentifier').attrib['Id']
             full_party = candidate.find('./Affiliation/Type').text
             party = self.PARTIES.get(full_party, full_party)
+            ballot_measure = False
         except AttributeError:
-            ballot_name = candidate.find('./ProposalItem').attrib['ProposalIdentifier']
-            id = ''
+            # Ballot Measure
+            ballot_measure = True
+            ballot_name = candidate.find('./ProposalItem').attrib['ReferendumOptionIdentifier']
+            id = ballot_name
             party = None
-        last_name = ballot_name.split().pop()
+        if not ballot_measure:
+            last_name = ballot_name.split().pop()
+        else:
+            last_name = ""
         display_id = '_'.join([last_name.lower(), id])
         votes = int(selection.find('./ValidVotes').text)
         try:
@@ -136,6 +149,8 @@ class GenericParser:
     def contest_dict(self, contest):
         contest_id = contest.find('./ContestIdentifier').attrib['Id']
         body = self.get_body(contest_id)
+        measure_number = self.get_ballot_measure_number(contest_id)
+            
         title = contest.find('./ContestIdentifier/ContestName').text
         
         candidates = dict()
@@ -148,7 +163,7 @@ class GenericParser:
         for reportingunit in contest.findall('./ReportingUnitVotes'):
             unit_id = reportingunit.find('./ReportingUnitIdentifier').attrib['Id']
             unit_title = reportingunit.find('./ReportingUnitIdentifier').text
-            display_id = '_'.join([unit_title, unit_id])
+            unit_display_id = '_'.join([unit_title, unit_id])
 
             geo = dict(state=self.NAME, district=contest_id[6:8])
             report_geo = dict(geo)
@@ -161,7 +176,7 @@ class GenericParser:
             for v in votes.values():
                 v['vote_percent'] = 100.0*v['votes']/vote_total if vote_total else 0
 
-            counties[display_id] = dict(title=unit_title, 
+            counties[unit_display_id] = dict(title=unit_title, 
                                         geo=report_geo, 
                                         votes=votes, 
                                         precincts=precincts)
@@ -169,6 +184,7 @@ class GenericParser:
                 'contest_id': contest_id,
                 'title': title,
                 'geo': geo,
+                'measure_number': measure_number,
                 'candidates': candidates,
                 'precincts': precincts,
                 'counties': counties})
