@@ -39,6 +39,10 @@ $(document).ready(function(){
             _.each(feature_sets, function(feature_set_name)
             {
                 var feature_set = cfg.get(feature_set_name);
+                if (feature_set == "pending")
+                {
+                    return;
+                }
                 
                 _.each(feature_set, function(feature)
                 {
@@ -420,7 +424,7 @@ $(document).ready(function(){
 
         if (!config.get("showcounties"))
         {
-            return {visible: false, fillOpacity: 0, strokeWidth:0};
+            return {visible: false, fillOpacity: 0, strokeWidth:0 };
         }
         if (config.get("body") == "propositions")
         {
@@ -524,15 +528,80 @@ $(document).ready(function(){
         return {fillColor: "#ffcc33", fillOpacity: 0.7, visible: true};
 
     }
-    function district_responsive_unselected_opts (showflag) {
+    function district_responsive_unselected_opts (poly, showflag) {
         if (!config.get(showflag))
         {
-            return {visible: false, fillOpacity: 0};
+            return {visible: false, fillOpacity: 0, fillColor: "#ffffff"};
         }
-        return {fillColor: "#999", fillOpacity: 0.7, visible: true};
+        var body = config.get("body");
+        var district_id = poly.id;
+        e = election;
+        contest = election.find(function(b){return b.get("name") == body}).get("contests").find(function(c){
+            return c.get("geo").district == district_id;
+        });
+
+        if(_.isUndefined(contest))
+        {
+            // No contest in this district
+            return {fillColor: "#999", fillOpacity: 0.7, visible: true};
+        }
+
+        var dem = contest.get("candidates").find(function(c){return c.get("party") == "Dem"});
+        var rep = contest.get("candidates").find(function(c){return c.get("party") == "Rep"});
+
+        if (_.isUndefined(dem))
+        {
+            dem_percent = 0;
+        }
+        else
+        {
+            dem_percent = dem.get("vote_percent");
+        }
+        if (_.isUndefined(rep))
+        {
+            rep_percent = 0;
+        }
+        else
+        {
+            rep_percent = rep.get("vote_percent");
+        }
+
+        if (rep_percent > 80)
+        {
+            return {fillColor: REP_HI, fillOpacity: 0.7, strokeWidth: 1,visible: true };
+        }
+        else if (rep_percent > 60)
+        {
+            return {fillColor: REP_MED, fillOpacity: 0.7, strokeWidth: 1,visible: true };
+        }
+        else if (rep_percent > 50)
+        {
+            return {fillColor: REP_LO, fillOpacity: 0.7, strokeWidth: 1,visible: true };
+        }
+
+        else if (dem_percent > 80)
+        {
+            return {fillColor: DEM_HI, fillOpacity: 0.7, strokeWidth: 1,visible: true };
+        }
+        else if (dem_percent > 60)
+        {
+            return {fillColor: DEM_MED, fillOpacity: 0.7, strokeWidth: 1,visible: true };
+        }
+        else if (dem_percent > 50)
+        {
+            return {fillColor: DEM_LO, fillOpacity: 0.7, strokeWidth: 1,visible: true };
+        }
+        else
+        {
+            return {fillColor: "#999", fillOpacity: 0.7, strokeWidth: 1,visible: true };
+        }
+
+
+
+
 
     }
-    function district_responsive_highlighted_opts (showflag) {
+    function district_responsive_highlighted_opts (poly, showflag) {
 
         
         if(!config.get(showflag))
@@ -556,6 +625,8 @@ $(document).ready(function(){
                 var idselector = this.idselector;
                 var showflag = this.showflag;
                 var feature_name = this.feature_name;
+                config.set(feature_name, "pending");
+
                 $.get(this.kml_url, function (data) {
                     var features = gmap.load_polygons({
                         map: config.get("map"),
@@ -570,9 +641,9 @@ $(document).ready(function(){
 
 
                         },
-                        responsive_unselected_opts: function(){return district_responsive_unselected_opts(showflag);},
+                        responsive_unselected_opts: function(){return district_responsive_unselected_opts(this, showflag);},
 
-                        responsive_highlighted_opts: function(){return district_responsive_highlighted_opts(showflag);}
+                        responsive_highlighted_opts: function(){return district_responsive_highlighted_opts(this, showflag);}
 
 
                    });
@@ -627,6 +698,7 @@ $(document).ready(function(){
                 var config_features = config.get("map_feature_sets");
                 config_features.push("county_features");
                 config.set("map_feature_sets", config_features, {silent: true});
+                config.set("county_features", "pending");
                $.get("kml/california_counties_use_simplified.kml", function (data) {
                 var features = gmap.load_polygons({
                     map: config.get("map"),
@@ -719,10 +791,10 @@ $(document).ready(function(){
 
                 });
             }
-            else if (body == "caassembly")
+            else if (body == "ca.assembly")
             {
                 caassembly_view.render(contest);
-                config.set({body : 'caassembly'});
+                config.set({body : 'ca.assembly'});
                 config.set({
                     showcounties: false,
                     showassembly: true,
