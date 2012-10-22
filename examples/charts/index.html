@@ -57,7 +57,7 @@ s.parentNode.insertBefore(ga, s);
     <div class="button" id="us.house-button">US House</div>
     <div class="button" id="ca.senate-button">CA Senate</div>
     <div class="button" id="ca.assembly-button">CA Assembly</div>
-    <div class="button" id="capropositions-button">Propositions</div>
+    <div class="button" id="ca.propositions-button">Propositions</div>
 </div>
 <div id="chart-canvas"></div>
 <div id="map-canvas"></div>
@@ -117,18 +117,15 @@ s.parentNode.insertBefore(ga, s);
     <div class="contest-basics">
         <div id="proposition-title">Propositions</div>
     </div>
-    <table id="proposition-table" class="result-table">
-    <thead>
-    <tr>
-    <th>#</th>
-    <th>Proposition</th>
-    <th>Results</th>
-    </tr>
-    </thead>
-    <tbody>
+    <div id="proposition-table">
+    <div id="prop-table-head">
+        <div class = "prop-table-label" id="prop-number-label">#</div>
+        <div class = "prop-table-label" id="prop-proposition-label">Proposition</div>
+        <div class="prop-table-label" id="prop-results-label">Results</div>
+    </div>
     {{#each propositions}}
-        <tr class="top-row">
-            <td>{{number}}</td>
+        <tr class="top-row" id="prop-top-{{measure_number}}">
+            <td>{{measure_number}}</td>
             <td>{{name}}</td>
             <td>
             <table class="proposition-inner-table">
@@ -142,9 +139,9 @@ s.parentNode.insertBefore(ga, s);
             </td>
 
         </tr>
-        <tr class="drawer description-drawer">
+        <tr class="drawer description-drawer" id="prop-description-{{measure_number}}">
         </tr>
-        <tr class="drawer county-drawer">
+        <tr class="drawer county-drawer" id="prop-county-{{measure_number}}">
             {{#if county_results}}
             {{#with county_results}}
                 <td><b>{{title}}</b><br />County</td>
@@ -159,7 +156,7 @@ s.parentNode.insertBefore(ga, s);
             {{/with}}
             {{/if}}
         </tr>
-        <tr class="drawer detailed-results-drawer">
+        <tr class="drawer detailed-results-drawer" id="prop-detail-{{measure_number}}">
         <td> </td>
         <td>TK votes reporting </td>
         <td class="table-right">

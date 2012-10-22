@@ -147,7 +147,10 @@ $(document).ready(function(){
                 // Remove third-party candidates
                 // Consolidating them as other
 
-                candidates.remove(candidates.filter(function(cand){return cand.get("party") != 'Dem' && cand.get("party") != 'Rep' && cand.get("party") != '---';}));
+                if(_.isUndefined(contest.measure_number))
+                {
+                    candidates.remove(candidates.filter(function(cand){return cand.get("party") != 'Dem' && cand.get("party") != 'Rep' && cand.get("party") != '---';}));
+                }
                 the_contests.add(newcontest);
             });
             the_body.set("contests", the_contests);
@@ -264,10 +267,11 @@ $(document).ready(function(){
             {
                 newcandidates.add(othercandidate);
             }
+            return newcandidates.remove(candidates.filter(function(cand){return cand.get("party") != 'Dem' && cand.get("party") != 'Rep' && cand.get("party") != '---';}));
         }
         
+        return newcandidates;
 
-        return newcandidates.remove(candidates.filter(function(cand){return cand.get("party") != 'Dem' && cand.get("party") != 'Rep' && cand.get("party") != '---';}));
 
     }
     var Candidate = Backbone.Model.extend({
@@ -426,7 +430,7 @@ $(document).ready(function(){
         {
             return {visible: false, fillOpacity: 0, strokeWidth:0 };
         }
-        if (config.get("body") == "propositions")
+        if (config.get("body") == "ca.propositions")
         {
         
 
@@ -804,7 +808,7 @@ $(document).ready(function(){
 
                 });
             }
-            else if (body == "capropositions")
+            else if (body == "ca.propositions")
             {
                 propositions_view.render(county);
                 config.set({

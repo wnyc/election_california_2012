@@ -2,6 +2,15 @@ body {
     font-family: Helvetica, Arial, sans-serif;
 
 }
+.prop-table-label {
+    float: left;
+
+}
+#prop-table-head {
+float: left;
+clear: both;
+
+}
 
 
 .button {
@@ -45,7 +54,7 @@ body {
 
 }
 
-#statewide-contest-results #contest-title {
+.contest-title {
     font-size: 24px;
     font-weight: bold;
 }
