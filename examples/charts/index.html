@@ -49,6 +49,7 @@ s.parentNode.insertBefore(ga, s);
 <!-- MAP TOP -->
 
     
+<div style="font-size: 36px; color: red"><blink>TEST DATA - DO NOT USE! </blink></div>
 <div id="container">
 <div id="updated"></div>
 <div id="buttons">
@@ -118,6 +119,57 @@ s.parentNode.insertBefore(ga, s);
 <!-- incumbent/winner key will go here -->
 </script>
 
+<script type="text/x-handlebars-template" id="proposition-row-template">
+  <div class="prop{{selected}}">
+    <div class="prop_top_row" id="prop-top-{{measure_number}}">
+        <div class="prop_top_number prop_top_entry">{{measure_number}}</div>
+        <a href="javascript:void(0);" class="prop_top_name">{{name}}</a>
+        <div class="prop_top_votes">
+        {{#each candidates}}
+            <div class="prop_top_vote">
+                <div class="prop_top_candidate">{{ballot_name}}</div>
+                <div class="prop_top_percent">{{vote_percent}}%</div>
+            </div>
+        {{/each}}
+        </div>
+    </div>
+
+    <div class="prop-drawer description-drawer" id="prop-description-{{measure_number}}">
+    </div>
+    <div class="prop-drawer county-drawer prop{{selected}}" id="prop-county-{{measure_number}}">
+        {{#if county_results}}
+        {{#with county_results}}
+            <div class="prop_county_name"><b>{{title}}</b><br />County</div>
+            <div class="prop_top_votes">
+                {{#each candidates}}
+                    <div class="prop_top_vote">
+                        <div class="prop_top_candidate">{{ballot_name}}</div>
+                        <div class="prop_top_percent">{{vote_percent}}%</div>
+                    </div>
+                {{/each}}
+            </div>
+
+        {{/with}}
+        {{/if}}
+    </div>
+    <div class="prop-drawer detailed-results-drawer prop{{selected}}" id="prop-detail-{{measure_number}}">
+        {{#if county_results}}
+        {{#with county_results}}
+        <div class="prop_vote_count">{{add_commas total_votes}} votes</div>
+        <div class="prop_percent_reporting">{{precincts_reporting_percent}}% reporting</div>
+        <a href="javascript:void(0);" class="hidebutton">hide</a>
+        {{/with}}
+        {{else}}
+        <div class="prop_vote_count">{{add_commas total_votes}} votes</div>
+        <div class="prop_percent_reporting">{{precincts_reporting_percent}}% reporting</div>
+        <a href="javascript:void(0);" class="hidebutton">hide</a>
+
+        {{/if}}
+    </div>
+ </div>
+
+</div>
+</script>
 <!-- Template for proposition results -->
 <script type="text/x-handlebars-template" id="proposition-results-template">
         <div id="proposition-title">Propositions</div>
@@ -128,45 +180,7 @@ s.parentNode.insertBefore(ga, s);
         <div class="prop-table-label" id="prop-results-label">Results</div>
     </div>
     <div id="prop-table">
-    {{#each propositions}}
-        <div class="prop_top_row" id="prop-top-{{measure_number}}">
-            <div class="prop_top_number prop_top_entry">{{measure_number}}</div>
-            <div class="prop_top_name">{{name}}</div>
-            <div class="prop_top_votes">
-            {{#each candidates}}
-                <div class="prop_top_vote">
-                    <div class="prop_top_candidate">{{ballot_name}}</div>
-                    <div class="prop_top_percent">{{vote_percent}}%</div>
-                </div>
-            {{/each}}
-            </div>
-        </div>
-
-        <div class="prop-drawer description-drawer" id="prop-description-{{measure_number}}">
-        </div>
-        <div class="prop-drawer county-drawer" id="prop-county-{{measure_number}}">
-            {{#if county_results}}
-            {{#with county_results}}
-                <div class="prop_county_name"><b>{{title}}</b><br />County</div>
-                {{#each candidates}}
-                    <div class="prop_top_vote">
-                        <div class="prop_top_candidate">{{ballot_name}}</div>
-                        <div class="prop_top_percent">{{vote_percent}}</div>
-                    </div>
-                {{/each}}
-
-            {{/with}}
-            {{/if}}
-        </div>
-        <div class="prop-drawer detailed-results-drawer" id="prop-detail-{{measure_number}}">
-            <a href="javascript:void(0);" class="hidebutton">hide</a>
-        </div>
-
     </div>
-    {{/each}}
-
-
-
 </script>
 <!-- Template for County results -->
 

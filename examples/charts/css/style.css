@@ -2,6 +2,28 @@
     font-family: Helvetica, Arial, sans-serif;
 
 }
+div .propselected {
+    background-color: yellow;
+    float: left;
+    display: block;
+    width: 100%;
+
+}
+.hidebutton {
+    float: left;
+
+}
+.prop_vote_count {
+ margin-left: 10%;
+ width: 80%;
+
+}
+.prop_percent_reporting {
+    margin-left: 10%;
+    float: left;
+    width: 75%;
+
+}
 .prop-table-label {
     float: left;
 
@@ -25,13 +47,17 @@
     font-weight: bold;
     float: left;
 }
-.prop_top_name {
+.prop_top_name,.prop_county_name {
     width: 60%;
     float: left;
 
 }
+.prop_county_name {
+    padding-left: 10%;
+
+}
 .prop_top_votes {
-    width: 25%;
+    width: 30%;
     float: left;
 }
 .prop_top_row {
@@ -39,6 +65,14 @@
     float: left;
     clear: both;
 
+}
+.prop_top_vote {
+    float: left;
+    width: 100%;
+}
+.prop_top_candidate, .prop_top_percent {
+    float: left;
+    width: 50%;
 }
 
 
@@ -157,5 +191,8 @@
 }
 .prop-drawer {
     display: none;
+    float: left;
+    width: 100%;
+    clear: both;
 }
 

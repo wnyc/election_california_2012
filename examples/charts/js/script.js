@@ -7,9 +7,11 @@ $(document).ready(function(){
     var result_row_template = Handlebars.compile($("#result-row-template").html());
     var result_table_template = Handlebars.compile($("#result-table-template").html());
     var proposition_results_template = Handlebars.compile($("#proposition-results-template").html());
+    var proposition_row_template = Handlebars.compile($("#proposition-row-template").html());
     var election;
     var router;
     var REP_HI = "#f40b0b", REP_MED = "#ff6666", REP_LO = "#ffb0b0", DEM_HI = "#b6ecff", DEM_MED = "#6cceff", DEM_LO = "#009eff";
+    var YES_HI = "#a00000", YES_LO = "#ea0000", NO_HI = "#aad607", NO_LO = '#4b8402';
     
     var presidential_view, ussenate_view, ushouse_view, casenate_view, caassembly_view, propositions_view;
     var county_map_view, assembly_map_view, ushouse_map_view, casenate_map_view;
@@ -77,8 +79,8 @@ $(document).ready(function(){
 
         defaults: {
             body : "",
-            contest: "",
-            county: "",
+            contest: 0,
+            county: 0,
             showcounties: false,
             showassembly: false,
             showsenate: false,
@@ -262,7 +264,7 @@ $(document).ready(function(){
                 var party = candidate.get("party");
                 if(party != 'Dem' && party != 'Rep')
                 {
-                    total_votes += parseInt(candidate.get("votes"), 10);
+                    total_votes += +candidate.get("votes");
                     total_vote_percent += parseFloat(candidate.get("vote_percent"));
                 }
             });
@@ -328,23 +330,23 @@ $(document).ready(function(){
         id: "district-contest-results",
         base_render : function(view){
             var title = view.model.get("title");
-            var district = config.get("contest") || 1;
-            district = parseInt(district, 10);
+            var district = config.get("contest") || 0;
+            district = +district;
             m = view.model;
             var contest = m.get("contests").find(function(c){return c.get("geo").district == district;});
-            if(!_.isUndefined(contest))
+
+            if (_.isUndefined(contest))
             {
-                var json = contest.toJSON();
-                json.candidates = json.candidates.toJSON();
-                json.body_title = title;
+                // Just take the first one
+
+                contest = m.get("contests").first();
+            }
+            var json = contest.toJSON();
+            json.candidates = json.candidates.toJSON();
+            json.body_title = title;
 
 
-                $(this.el).html(district_contest_template(json));
-            }
-            else
-            {
-                // Do the right thing when there's no valid race
-            }
+            $(this.el).html(district_contest_template(json));
             $('#chart-canvas').html($(this.el)); 
 
         }
@@ -410,31 +412,84 @@ $(document).ready(function(){
         }
     });
 
+    var PropositionView = Backbone.View.extend({
+        tagName: "div",
+        className: "prop-row",
+        events: {
+            "click .prop_top_name" : "select",
+            "click .hidebutton" : "unselect"
+
+        },
+
+        select: function(){
+            config.set({contest: this.model.get("measure_number")});
+            config.redraw_feature_set("county_features");
+        },
+
+        unselect: function (){
+            config.set({contest: 0});
+            config.redraw_feature_set("county_features");
+
+        },
+
+
+        render: function(){
+            // model should be a proposition
+            var proposition = this.model.toJSON();
+            proposition.selected = +config.get("contest") == this.model.get("measure_number") ? "selected" : "";
+            // Always two candidates: yes and no
+            proposition.candidates = proposition.candidates.toJSON();
+            var total = proposition.candidates[0].votes + proposition.candidates[1].votes;
+            proposition.candidates[0].vote_percent = (100 * proposition.candidates[0].votes / total).toFixed(1);
+            proposition.candidates[1].vote_percent = (100 * proposition.candidates[1].votes / total).toFixed(1);
+            proposition.total_votes = total;
+
+            var county = config.get("county");
+
+            if (county){
+                var county_results = proposition.counties.find(function(cty){return cty.get("title") == county;});
+                proposition.county_results = county_results.toJSON();
+                proposition.county_results.candidates = proposition.county_results.candidates.toJSON();
+                proposition.county_results.total_votes = proposition.county_results.candidates[0].votes + proposition.county_results.candidates[1].votes;
+
+
+            }
+
+            $(this.el).html(proposition_row_template(proposition));
+
+            $('#prop-table').append($(this.el));
+            this.delegateEvents();
+            return this;
+            
+
+
+
+
+        }
+
+    });
+
     var PropositionsView = Backbone.View.extend({
         tagName: "div",
         id: "proposition-contest-results",
         render: function(county_name) {
             var json = {};
             json.body_title = this.model.get("title");
-            json.propositions = this.model.get("contests").toJSON();
-            _.each(json.propositions, function(proposition) {
-                // Need to compute percentages too
-                // Always two vote types: Yes and No
-                proposition.candidates = proposition.candidates.toJSON();
-                var total = proposition.candidates[0].votes + proposition.candidates[1].votes;
-                proposition.candidates[0].vote_percent = (100 * proposition.candidates[0].votes / total).toFixed(2);
-                proposition.candidates[1].vote_percent = (100 * proposition.candidates[1].votes / total).toFixed(2);
+            if (_.isUndefined(this.propositions))
+            {
+                this.propositions = this.model.get("contests");
+                var proposition_views = this.proposition_views = [];
+                this.propositions.each(function(proposition){
+                    proposition_views.push(new PropositionView({model: proposition, id: 'prop-row-' + proposition.get("measure_number")}));
+                });
+            }
                 
 
-            });
+            $(this.el).html(proposition_results_template());
 
-            if(!_.isUndefined(county_name))
-            {
-            }
-            console.log(json);
 
-            $(this.el).html(proposition_results_template(json));
             $('#chart-canvas').html($(this.el));
+            _.invoke(this.proposition_views, 'render');
             county_map_view.render(county_name);
 
             
@@ -450,19 +505,66 @@ $(document).ready(function(){
         {
             return {visible: false, fillOpacity: 0, strokeWidth:0 };
         }
-        if (config.get("body") == "ca.propositions")
+        if (config.get("county") && !this.getHighlighted())
         {
-        
+            // If another county is selected
+            return {fillColor: "#999", fillOpacity: 0.7, strokeWidth: 1,visible: true };
+        }
+        if (config.get("body") == "ca.propositions" && config.get("contest") != 0)
+        {
+            var proposition = +config.get("contest");
+
+            var thecounty = this.id;
+            var contest = election.find(function(b){return b.get("name") == "ca.propositions"}).get("contests").find(function(c){
+                return +c.get("measure_number") == proposition;
+
+            });
+
+            var county = contest.get("counties").find(function(c){
+                return c.get("title") == thecounty;
+            });
+            if (county.get("precincts_reporting_percent") < 10)
+            {
+                // Insufficent data -- color it grey
+                return {fillColor: "#999", fillOpacity: 0.7, strokeWidth: 1,visible: true };
+            }
+
+            var yes = county.get("candidates").find(function(c){return c.get("ballot_name") == "Yes"}).get("vote_percent");
+            var fill_color;
+
+            if (yes > 80)
+            {
+                fill_color = YES_HI;
+            }
+
+            else if (yes > 50)
+            {
+                fill_color = YES_LO;
+            }
+            else if (yes < 20)
+            {
+                fill_color = NO_HI;
+            }
+            else if (yes < 50)
+            {
+                fill_color = NO_LO;
+            }
+            else fill_color = "#999";
+
+            return {fillColor: fill_color, fillOpacity: 0.7, strokeWidth : 1, visible: true};
+
+
+
+
+            
+
+
+
 
         }
 
 
         // Red blue map
-        if (config.get("county"))
-        {
-            // If another county is selected
-            return {fillColor: "#999", fillOpacity: 0.7, strokeWidth: 1,visible: true };
-        }
 
         else
         {
@@ -544,12 +646,6 @@ $(document).ready(function(){
 
     }
     function county_responsive_highlighted_opts () {
-        if (!config.get("showcounties"))
-        {
-            return {visible: false};
-        }
-
-        return {fillColor: "#ffcc33", fillOpacity: 0.7, visible: true};
 
     }
     function district_responsive_unselected_opts (poly, showflag) {
@@ -558,8 +654,7 @@ $(document).ready(function(){
             return {visible: false, fillOpacity: 0, fillColor: "#ffffff"};
         }
         var body = config.get("body");
-        var district_id = poly.id;
-        e = election;
+        var district_id = +poly.id;
         contest = election.find(function(b){return b.get("name") == body}).get("contests").find(function(c){
             return c.get("geo").district == district_id;
         });
@@ -572,8 +667,11 @@ $(document).ready(function(){
 
         var selected_district = config.get("contest");
 
-        if (selected_district && selected_district != district_id)
+        if (selected_district && selected_district != district_id && selected_district != 0)
         {
+            console.log(selected_district);
+            console.log(district_id);
+
             return {fillColor: "#999", fillOpacity: 0.7, visible: true};
 
         }
@@ -640,7 +738,6 @@ $(document).ready(function(){
         {
             return {visible: false};
         }
-        return {fillColor: "#ffcc33", fillOpacity: 0.7, visible: true};
 
     }
     var DistrictMapView = Backbone.View.extend({
@@ -666,7 +763,7 @@ $(document).ready(function(){
                         data_type: "kml",
                         idselector: idselector,
                         highlightCallback : function () {
-                            var district = parseInt(this.id, 10);
+                            var district = +this.id;
                             config.set({contest: district});
                             config.redraw_feature_set(feature_name);
 
@@ -781,7 +878,7 @@ $(document).ready(function(){
            "body/:body/:contest/:county" : "navto"
         },
         navto: function(body, contest, county) {
-            config.set({body : body || "us.president", contest: contest || '', county : county || '' }, {silent: true});
+            config.set({body : body || "us.president", contest: contest || '0', county : county || '' }, {silent: true});
             this.show (body, contest, county);
         },
 
@@ -825,7 +922,7 @@ $(document).ready(function(){
             }
             else if (body == "ca.senate")
             {
-                casenate_view.render(contest);
+                casenate_view.render(contest || 1);
                 config.set({
                     showcounties: false,
                     showassembly: false,
@@ -837,7 +934,7 @@ $(document).ready(function(){
             }
             else if (body == "ca.assembly")
             {
-                caassembly_view.render(contest);
+                caassembly_view.render(contest || 1);
                 config.set({body : 'ca.assembly'});
                 config.set({
                     showcounties: false,
@@ -850,14 +947,23 @@ $(document).ready(function(){
             }
             else if (body == "ca.propositions")
             {
-                propositions_view.render(county);
+                var contest = config.get("contest");
+
+                if (contest == 0)
+                {
+                    // So we always select one
+                    contest = 30;
+                }
+
                 config.set({
                     showcounties: true,
                     showassembly: false,
                     showsenate: false,
-                    showushouse: false
+                    showushouse: false,
+                    contest: contest
 
                 });
+                propositions_view.render(county);
             }
             else {
                 config.set({body : "us.president"});
