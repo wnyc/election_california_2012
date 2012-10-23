@@ -269,7 +269,7 @@ $(document).ready(function(){
                 }
             });
             other_candidate.set({votes: total_votes, vote_percent: total_vote_percent.toFixed(1)});
-            if(total_votes == 0)
+            if(total_votes === 0)
             {
                 return null;
             }
@@ -510,12 +510,12 @@ $(document).ready(function(){
             // If another county is selected
             return {fillColor: "#999", fillOpacity: 0.7, strokeWidth: 1,visible: true };
         }
-        if (config.get("body") == "ca.propositions" && config.get("contest") != 0)
+        if (config.get("body") == "ca.propositions" && config.get("contest") !== 0)
         {
             var proposition = +config.get("contest");
 
             var thecounty = this.id;
-            var contest = election.find(function(b){return b.get("name") == "ca.propositions"}).get("contests").find(function(c){
+            var contest = election.find(function(b){return b.get("name") == "ca.propositions";}).get("contests").find(function(c){
                 return +c.get("measure_number") == proposition;
 
             });
@@ -529,7 +529,7 @@ $(document).ready(function(){
                 return {fillColor: "#999", fillOpacity: 0.7, strokeWidth: 1,visible: true };
             }
 
-            var yes = county.get("candidates").find(function(c){return c.get("ballot_name") == "Yes"}).get("vote_percent");
+            var yes = county.get("candidates").find(function(c){return c.get("ballot_name") == "Yes";}).get("vote_percent");
             var fill_color;
 
             if (yes > 80)
@@ -569,7 +569,7 @@ $(document).ready(function(){
         else
         {
             var body = config.get("body");
-            var contest = election.find(function(b){return b.get("name") == body}).get("contests").first(); // Only one for these statewide offices
+            var contest = election.find(function(b){return b.get("name") == body;}).get("contests").first(); // Only one for these statewide offices
             var thecounty = this.id;
             var county = contest.get("counties").find(function(c){
                 return c.get("title") == thecounty;
@@ -581,8 +581,8 @@ $(document).ready(function(){
             }
 
 
-            var dem = county.get("candidates").find(function(c){return c.get("party") == "Dem"});
-            var rep = county.get("candidates").find(function(c){return c.get("party") == "Rep"});
+            var dem = county.get("candidates").find(function(c){return c.get("party") == "Dem";});
+            var rep = county.get("candidates").find(function(c){return c.get("party") == "Rep";});
 
             if (_.isUndefined(dem))
             {
@@ -655,7 +655,7 @@ $(document).ready(function(){
         }
         var body = config.get("body");
         var district_id = +poly.id;
-        contest = election.find(function(b){return b.get("name") == body}).get("contests").find(function(c){
+        contest = election.find(function(b){return b.get("name") == body;}).get("contests").find(function(c){
             return c.get("geo").district == district_id;
         });
 
@@ -667,7 +667,7 @@ $(document).ready(function(){
 
         var selected_district = config.get("contest");
 
-        if (selected_district && selected_district != district_id && selected_district != 0)
+        if (selected_district && selected_district != district_id && selected_district !== 0)
         {
             console.log(selected_district);
             console.log(district_id);
@@ -676,8 +676,8 @@ $(document).ready(function(){
 
         }
 
-        var dem = contest.get("candidates").find(function(c){return c.get("party") == "Dem"});
-        var rep = contest.get("candidates").find(function(c){return c.get("party") == "Rep"});
+        var dem = contest.get("candidates").find(function(c){return c.get("party") == "Dem";});
+        var rep = contest.get("candidates").find(function(c){return c.get("party") == "Rep";});
 
         if (_.isUndefined(dem))
         {
@@ -797,7 +797,7 @@ $(document).ready(function(){
         feature_name: "house_features",
         kml_url: "kml/ca_congress_simple0020.kml",
         showflag: "showushouse",
-        idselector: 'name',
+        idselector: 'name'
         
         
     });
@@ -949,7 +949,7 @@ $(document).ready(function(){
             {
                 var contest = config.get("contest");
 
-                if (contest == 0)
+                if (contest === 0)
                 {
                     // So we always select one
                     contest = 30;
