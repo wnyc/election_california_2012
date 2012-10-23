@@ -46,11 +46,32 @@ clear: both;
     float: left;
     width: 350px;
 }
-#map-canvas {
+#map_and_zooms {
     float: left;
     width: 350px;
     margin-left: 5px;
     height: 600px;
+
+}
+#map-canvas {
+    float: left;
+    width: 350px;
+    height: 570px;
+}
+#zoom {
+    height: 30px;
+    width: 340px;
+    float: left;
+    padding-left: 10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    font-size: 12px;
+    background-color: #eee;
+}
+#zoombox {
+    height: 20px;
+    width: 200px;
+    margin-left: 5px;
 
 }
 

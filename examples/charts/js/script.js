@@ -32,6 +32,25 @@ $(document).ready(function(){
     }
     var Config = Backbone.Model.extend({
         // body, contest, county
+        
+        codeAddress: function() {
+              var address = $('#zoombox').val();
+              var map = this.get("map");
+              this.get("geocoder").geocode( { 'address': address}, function(results, status) {
+                if (status == google.maps.GeocoderStatus.OK) {
+                  map.setCenter(results[0].geometry.location);
+                                    map.setZoom(7);
+                                    marker = new google.maps.Marker({
+                    map:map,
+                    draggable:false,
+                    animation: google.maps.Animation.DROP,
+                    position: results[0].geometry.location
+                  });
+                } else {
+                  alert("Couldn't relocate for the following reason: " + status);
+                }
+              });
+        },
         redraw_features : function () {
             var cfg = this;
             var feature_sets = this.get("map_feature_sets");
@@ -73,7 +92,8 @@ $(document).ready(function(){
                 streetViewControl: false,
                 mapTypeControl: false
             }) : null,
-            map_feature_sets: [],
+            geocoder : new google.maps.Geocoder(),
+            map_feature_sets: []
 
         }
 
@@ -757,7 +777,7 @@ $(document).ready(function(){
            "body/:body/:contest/:county" : "navto"
         },
         navto: function(body, contest, county) {
-            config.set({body : body || "us.president", contest: contest || '1', county : county || '' }, {silent: true});
+            config.set({body : body || "us.president", contest: contest || '', county : county || '' }, {silent: true});
             this.show (body, contest, county);
         },
 
@@ -770,7 +790,7 @@ $(document).ready(function(){
                     showassembly: false,
                     showsenate: false,
                     showushouse: false,
-                    contest: '1'
+                    contest: '0'
 
                 });
 
@@ -783,7 +803,7 @@ $(document).ready(function(){
                     showassembly: false,
                     showsenate: false,
                     showushouse: false,
-                    contest: '1'
+                    contest: '0'
 
                 });
             }
@@ -887,6 +907,13 @@ $(document).ready(function(){
             config.set({body: which_body});
 
         });
+        $('#zoombox').keyup(function(event){
+            if(event.which == 13)
+            {
+                // Enter pressed
+                config.codeAddress();
+            }
+          });
 
         if(!Backbone.history.start())
         {
