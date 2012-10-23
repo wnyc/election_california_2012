@@ -669,8 +669,6 @@ $(document).ready(function(){
 
         if (selected_district && selected_district != district_id && selected_district !== 0)
         {
-            console.log(selected_district);
-            console.log(district_id);
 
             return {fillColor: "#999", fillOpacity: 0.7, visible: true};
 

@@ -1,5 +1,5 @@
-/ody {
-    font-family: Helvetica, Arial, sans-serif;
+body {
+    font-family: "Helvetica", Arial, sans-serif;
 
 }
 div .propselected {
@@ -12,6 +12,14 @@ div .propselected {
 .hidebutton {
     float: left;
 
+}
+tr:first-child 
+{
+    font-weight: bold;
+
+}
+.county-drawer {
+    margin-bottom: 20px;
 }
 .prop_vote_count {
  margin-left: 10%;
@@ -29,6 +37,8 @@ div .propselected {
 
 }
 #prop-table-head {
+    margin-top: 10px;
+    margin-bottom: 15px;
 
 }
 
@@ -109,18 +119,24 @@ div .propselected {
 #chart-canvas {
     float: left;
     width: 350px;
+    margin-top: 20px;
+    height: 400px;
+    overflow-y: auto;
+
 }
-#map_and_zooms {
+
+#map_and_zoom {
     float: left;
     width: 350px;
     margin-left: 5px;
     height: 600px;
+    margin-top: 20px;
 
 }
 #map-canvas {
     float: left;
     width: 350px;
-    height: 570px;
+    height: 400px;
 }
 #zoom {
     height: 30px;
@@ -139,11 +155,11 @@ div .propselected {
 
 }
 
-.contest-title {
-    font-size: 24px;
+#contest-title {
+    font-size: 36px;
     font-weight: bold;
 }
-#statewide-contest-results #contest-district {
+#statewide-contest-results #contest-district, #contest-pretitle {
     font-weight: bold;
 
 }
@@ -151,6 +167,12 @@ div .propselected {
 #contest-percent-reporting {
     float: right;
     color: #999;
+}
+.detailed-results-drawer {
+    color: #999;
+    font-size: 12px;
+    line-height: 18px;
+
 }
 .percent-reporting {
     font-size: 24px;
@@ -166,6 +188,7 @@ div .propselected {
 
 .contest-basics {
     float: left;
+    clear: both;
 }
 .result-table {
     border-top: 1px solid #999;
@@ -179,6 +202,12 @@ div .propselected {
     font-weight: normal;
     color: #999;
     font-size: 12px;
+}
+#prop-table-head {
+    font-weight: normal;
+    color: #999;
+    font-size: 12px;
+
 }
 .result-table tr {
     height: 25px;
@@ -194,5 +223,10 @@ div .propselected {
     float: left;
     width: 100%;
     clear: both;
+}
+.prop-row {
+    margin-top: 10px;
+    margin-bottom: 10px;
+
 }
 

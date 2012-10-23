@@ -121,7 +121,7 @@ s.parentNode.insertBefore(ga, s);
 
 <script type="text/x-handlebars-template" id="proposition-row-template">
   <div class="prop{{selected}}">
-    <div class="prop_top_row" id="prop-top-{{measure_number}}">
+    <div class="prop-row prop_top_row" id="prop-top-{{measure_number}}">
         <div class="prop_top_number prop_top_entry">{{measure_number}}</div>
         <a href="javascript:void(0);" class="prop_top_name">{{name}}</a>
         <div class="prop_top_votes">
@@ -167,19 +167,21 @@ s.parentNode.insertBefore(ga, s);
         {{/if}}
     </div>
  </div>
-
-</div>
 </script>
 <!-- Template for proposition results -->
 <script type="text/x-handlebars-template" id="proposition-results-template">
-        <div id="proposition-title">Propositions</div>
-    <div id="proposition-table">
-    <div id="prop-table-head">
-        <div class = "prop-table-label" id="prop-number-label">#</div>
-        <div class = "prop-table-label" id="prop-proposition-label">Proposition</div>
-        <div class="prop-table-label" id="prop-results-label">Results</div>
+    <div class="contest-basics">
+    <div id="contest-title">Propositions</div>
     </div>
-    <div id="prop-table">
+    <div id="proposition-table" class="result-table">
+        <div id="prop-table-head" class="prop_top_row">
+            <div class = "prop-table-label" id="prop-number-label">#</div>
+            <div class = "prop-table-label" id="prop-proposition-label">Proposition</div>
+            <div class="prop-table-label" id="prop-results-label">Results</div>
+        </div>
+
+        <div id="prop-table">
+        </div>
     </div>
 </script>
 <!-- Template for County results -->
@@ -200,8 +202,8 @@ s.parentNode.insertBefore(ga, s);
 <!-- Template for US House/State Senate/State Assembly -->
 <script type="text/x-handlebars-template" id="district-contest-template">
     <div class ="contest-basics">
-        <div id="contest-title">{{body_title}}</div>
-        <div id="contest-district">District {{geo.district}}</div>
+        <div id="contest-pretitle">{{body_title}}</div>
+        <div id="contest-title">District {{geo.district}}</div>
     </div>
     <div id="contest-percent-reporting">
         <div class="percent-reporting" id="contest-percent">{{precincts_reporting_percent}}%</div>
@@ -232,7 +234,6 @@ s.parentNode.insertBefore(ga, s);
         </div>
     {{/if}}
 
-    </div>
 </script>
 
 <script type="text/x-handlebars-template" id="state-contest-template">
