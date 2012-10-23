@@ -135,7 +135,7 @@ $(document).ready(function(){
                     geo: contest.geo,
                     precincts_total: contest.precincts.total,
                     precincts_reporting: contest.precincts.reporting,
-                    measure_number: contest.measure_number,
+                    measure_number: +contest.measure_number,
                     precincts_reporting_percent: contest.precincts.reporting_percent
                 });
                 newcontest.parse_candidates(contest.candidates);
@@ -222,7 +222,11 @@ $(document).ready(function(){
         }
     });
     var Contests = Backbone.Collection.extend({
-        model : Contest
+        model : Contest,
+        comparator: function (contest) {
+            return contest.get("measure_number");
+
+        }
 
     });
 

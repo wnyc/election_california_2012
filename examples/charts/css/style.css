@@ -1,4 +1,4 @@
-body {
+/ody {
     font-family: Helvetica, Arial, sans-serif;
 
 }
@@ -7,10 +7,40 @@ body {
 
 }
 #prop-table-head {
-float: left;
-clear: both;
 
 }
+
+#prop-number-label {
+    width: 10%;
+}
+#prop-proposition-label {
+    width: 60%;
+
+}
+#prop-results-label {
+    width: 30%;
+}
+.prop_top_number {
+    width: 10%;
+    font-weight: bold;
+    float: left;
+}
+.prop_top_name {
+    width: 60%;
+    float: left;
+
+}
+.prop_top_votes {
+    width: 25%;
+    float: left;
+}
+.prop_top_row {
+    width: 100%;
+    float: left;
+    clear: both;
+
+}
+
 
 
 .button {
@@ -125,7 +155,7 @@ clear: both;
     text-align: right;
 
 }
-.drawer {
+.prop-drawer {
     display: none;
 }
 
