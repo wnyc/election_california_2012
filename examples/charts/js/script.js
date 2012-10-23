@@ -9,7 +9,6 @@ $(document).ready(function(){
     var proposition_results_template = Handlebars.compile($("#proposition-results-template").html());
     var election;
     var router;
-
     var REP_HI = "#f40b0b", REP_MED = "#ff6666", REP_LO = "#ffb0b0", DEM_HI = "#b6ecff", DEM_MED = "#6cceff", DEM_LO = "#009eff";
     
     var presidential_view, ussenate_view, ushouse_view, casenate_view, caassembly_view, propositions_view;
@@ -38,7 +37,12 @@ $(document).ready(function(){
             var feature_sets = this.get("map_feature_sets");
             _.each(feature_sets, function(feature_set_name)
             {
-                var feature_set = cfg.get(feature_set_name);
+                cfg.redraw_feature_set(feature_set_name);
+            });
+            
+        },
+        redraw_feature_set : function (feature_set_name) {
+                var feature_set = this.get(feature_set_name);
                 if (feature_set == "pending")
                 {
                     return;
@@ -49,8 +53,7 @@ $(document).ready(function(){
                     feature.redraw();
 
                 });
-            });
-            
+
         },
 
         defaults: {
@@ -418,13 +421,6 @@ $(document).ready(function(){
     });
 
     function county_responsive_unselected_opts () {
-        if(config.get("county") == this.id)
-        {
-            
-            // Unselect yourself on mouseout
-            config.set({county: ''});
-
-        }
 
         if (!config.get("showcounties"))
         {
@@ -550,6 +546,14 @@ $(document).ready(function(){
             return {fillColor: "#999", fillOpacity: 0.7, visible: true};
         }
 
+        var selected_district = config.get("contest");
+
+        if (selected_district && selected_district != district_id)
+        {
+            return {fillColor: "#999", fillOpacity: 0.7, visible: true};
+
+        }
+
         var dem = contest.get("candidates").find(function(c){return c.get("party") == "Dem"});
         var rep = contest.get("candidates").find(function(c){return c.get("party") == "Rep"});
 
@@ -638,10 +642,16 @@ $(document).ready(function(){
                         data_type: "kml",
                         idselector: idselector,
                         highlightCallback : function () {
-                            // Be careful to use right ID
-                            // Districts are zero-indexed in map
                             var district = parseInt(this.id, 10);
                             config.set({contest: district});
+                            config.redraw_feature_set(feature_name);
+
+
+                        },
+                        unhighlightCallback : function () {
+                            config.set({contest: ''});
+                            config.redraw_feature_set(feature_name);
+
 
 
                         },
@@ -712,7 +722,13 @@ $(document).ready(function(){
                     highlightCallback : function () {
                         var countyname = this.id;
                         config.set({county: countyname});
+                        config.redraw_feature_set("county_features");
 
+
+                    },
+                    unhighlightCallback: function() {
+                        config.set({county: ''});
+                        config.redraw_feature_set("county_features");
 
                     },
                     responsive_unselected_opts: county_responsive_unselected_opts,

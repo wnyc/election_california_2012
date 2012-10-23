@@ -105,7 +105,9 @@ var gmap = gmap || {};
         this._highlighted = false;
 
         this.highlightCallback = params.highlightCallback;
+        this.unhighlightCallback = params.unhighlightCallback;
         this.selectCallback = params.selectCallback;
+        this.unselectCallback = params.unselectCallback;
 
         var empty_function = function() { return { }; }
 
@@ -215,6 +217,10 @@ var gmap = gmap || {};
             } else if (value === false) {
                 this._selected = false;
                 this.redraw();
+                if (this.unselectCallback) {
+                    this.unselectCallback();
+
+                }
             }
         },
         getHighlighted: function() {
@@ -230,6 +236,10 @@ var gmap = gmap || {};
                 }
             } else if ((value === false) && (this._highlighted === true)) {
                 this._highlighted = false;
+                if (this.unhighlightCallback) {
+                    this.unhighlightCallback();
+
+                }
                 this.redraw();
             }
         }
@@ -391,7 +401,9 @@ var gmap = gmap || {};
             opts.responsive_selected_opts = params.responsive_selected_opts;
             // Callbacks
             opts.highlightCallback = params.highlightCallback;
+            opts.unhighlightCallback = params.unhighlightCallback;
             opts.selectCallback = params.selectCallback;
+            opts.unselectCallback = params.unselectCallback;
 
             self[data[i].id] = new gmap.Feature(opts);
         }
