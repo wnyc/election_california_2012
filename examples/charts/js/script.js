@@ -510,7 +510,7 @@ $(document).ready(function(){
             // If another county is selected
             return {fillColor: "#999", fillOpacity: 0.7, strokeWidth: 1,visible: true };
         }
-        if (config.get("body") == "ca.propositions" && config.get("contest") !== 0)
+        if (config.get("body") == "ca.propositions" && +config.get("contest") !== 0)
         {
             var proposition = +config.get("contest");
 
@@ -665,7 +665,7 @@ $(document).ready(function(){
             return {fillColor: "#999", fillOpacity: 0.7, visible: true};
         }
 
-        var selected_district = config.get("contest");
+        var selected_district = +config.get("contest");
 
         if (selected_district && selected_district != district_id && selected_district !== 0)
         {
@@ -947,7 +947,7 @@ $(document).ready(function(){
             }
             else if (body == "ca.propositions")
             {
-                var contest = config.get("contest");
+                var contest = +config.get("contest");
 
                 if (contest === 0)
                 {
