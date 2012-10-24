@@ -916,11 +916,11 @@ $(document).ready(function(){
 
     var Router = Backbone.Router.extend({
         routes : {
-           "body/:body" : "navto",
-           "body/:body/:contest" : "navto",
-           "body/:body/:contest/" : "navto",
-           "body/:body/:contest/:county/" : "navto",
-           "body/:body/:contest/:county" : "navto"
+           ":body" : "navto",
+           ":body/:contest" : "navto",
+           ":body/:contest/" : "navto",
+           ":body/:contest/:county/" : "navto",
+           ":body/:contest/:county" : "navto"
         },
         navto: function(body, contest, county) {
             config.set({body : body || "us.president", contest: contest || '0', county : county || '' }, {silent: true});
@@ -1051,15 +1051,15 @@ $(document).ready(function(){
         $('#timeval').html(moment(data.issuedate).format("LLL"));
 
         config.on("change:contest change:county", function(){
-            router.navigate("#body/" + config.get("body") + "/" + config.get("contest") + "/" + config.get("county"), {trigger: true});
+            router.navigate("#" + config.get("body") + "/" + config.get("contest") + "/" + config.get("county"), {trigger: true});
         });
         config.on("change:body change:timeval", function(){
-            router.navigate("#body/" + config.get("body"), {trigger: true});
+            router.navigate("#" + config.get("body"), {trigger: true});
             config.redraw_features();
 
         });
         election.on("change", function(){
-            router.navigate("#body/" + config.get("body") + "/" + config.get("contest") + "/" + (config.get("county") || 0), {trigger: true});
+            router.navigate("#" + config.get("body") + "/" + config.get("contest") + "/" + (config.get("county") || 0), {trigger: true});
             config.redraw_features();
 
         });
