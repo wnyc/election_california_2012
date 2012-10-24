@@ -685,7 +685,7 @@ $(document).ready(function(){
         if(_.isUndefined(contest))
         {
             // No contest in this district
-            return {fillColor: "#999", fillOpacity: 0.7, visible: true};
+            return {visible: false};
         }
 
         var selected_district = +config.get("contest");
