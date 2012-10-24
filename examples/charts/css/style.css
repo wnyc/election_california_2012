@@ -2,6 +2,15 @@ body {
     font-family: "Helvetica", Arial, sans-serif;
 
 }
+::-webkit-scrollbar {
+    -webkit-appearance: none;
+        width: 7px;
+        }
+::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    background-color: rgba(0,0,0,.5);
+    -webkit-box-shadow: 0 0 1px rgba(255,255,255,.5);
+}
 .boxtitle {
     font-weight: bold;
     float: left;
@@ -77,8 +86,7 @@ body {
 }
 #timestamp {
     color: #F66;
-    position:absolute;
-    right:0;
+    float: right;
     font-size: 12px;
     display: inline;
 
@@ -330,5 +338,61 @@ tr:first-child
     margin-top: 10px;
     margin-bottom: 10px;
 
+}
+
+@media all and (min-width: 600px) {
+    .button {
+        width: 99px;
+    }
+    #zoom {
+        width: 245px;
+        height: 40px;
+    }
+    #map-canvas {
+        width: 255px;
+    }
+    #zoombox {
+        margin-left: 0px;
+        width: 230px;
+
+    }
+    #map_and_zoom {
+        width: 250px;
+    }
+
+    body {
+        width: 625px;
+    }
+}
+
+@media all and (min-width: 725px)
+{
+    body {
+
+        width: 725px;
+    }
+    .button {
+        width: 117px;
+
+    }
+    #zoom {
+        height: 30px;
+        width: 345px;
+    }
+    #map-canvas {
+        width: 355px;
+    }
+    #zoombox {
+        width: 200px;
+        margin-left: 5px;
+
+    }
+    #map_and_zoom {
+        width: 250px;
+    }
+
+    body {
+        width: 725px;
+    }
 }
 

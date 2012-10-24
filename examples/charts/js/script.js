@@ -1,7 +1,7 @@
-var config;
-var election;
 $(document).ready(function(){
     var router;
+    var config;
+    var election;
     var statewide_contest_template = Handlebars.compile($("#statewide-contest-template").html());
     var district_contest_template = Handlebars.compile($("#district-contest-template").html());
     var county_results_template = Handlebars.compile($("#county-results-template").html());
@@ -19,6 +19,7 @@ $(document).ready(function(){
     Handlebars.registerHelper('add_commas', addCommas);
 
     function scale_page(){
+        return;
         var width = $(window).width();
         if (width > 725)
         {
@@ -45,9 +46,9 @@ $(document).ready(function(){
     {
         // Public domain code from http://www.mredkj.com/javascript/nfbasic.html
         nStr += '';
-        x = nStr.split('.');
-        x1 = x[0];
-        x2 = x.length > 1 ? '.' + x[1] : '';
+        var x = nStr.split('.');
+        var x1 = x[0];
+        var x2 = x.length > 1 ? '.' + x[1] : '';
         var rgx = /(\d+)(\d{3})/;
         while (rgx.test(x1)) {
             x1 = x1.replace(rgx, '$1' + ',' + '$2');
@@ -367,8 +368,7 @@ $(document).ready(function(){
             var title = view.model.get("title");
             var district = config.get("contest") || 0;
             district = +district;
-            m = view.model;
-            var contest = m.get("contests").find(function(c){return c.get("geo").district == district;});
+            var contest = view.model.get("contests").find(function(c){return c.get("geo").district == district;});
 
             if (_.isUndefined(contest))
             {
@@ -432,7 +432,6 @@ $(document).ready(function(){
 
             if(!_.isUndefined(county_name))
             {
-                j = json;
                 var county_results = json.counties.where({title: county_name});
                 if (county_results.length > 0)
                 {
