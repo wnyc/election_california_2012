@@ -2,17 +2,23 @@ body {
     font-family: "Helvetica", Arial, sans-serif;
 
 }
-#county-percent-reporting {
+#county-percent-reporting,#county-percent {
     float: right;
+    font-size: 12px;
+    line-height: 18px;
+    color: #999;
 
 }
 #statewide-contest-county {
+    border-top: solid 3px;
+    float: left;
+    width: 100%;
+    padding-top: 5px;
 
 }
 #county-title {
     font-weight: bold;
     float: left;
-    padding-top: 15px;
 }
 #election_header {
     font-size: 24;
@@ -75,6 +81,14 @@ tr:first-child
 }
 #prop-results-label {
     width: 30%;
+}
+#results-table-icons {
+    float: left;
+    clear: both;
+    word-spacing: 15px;
+    padding-top: 15px;
+    margin-left: 5px;
+
 }
 .prop_top_number {
     width: 10%;
@@ -159,18 +173,19 @@ tr:first-child
 }
 #map-canvas {
     float: left;
-    width: 350px;
+    width: 375px;
     height: 400px;
 }
 #zoom {
     height: 30px;
-    width: 340px;
+    width: 365px;
     float: left;
     padding-left: 10px;
     padding-top: 10px;
     padding-bottom: 10px;
     font-size: 12px;
     background-color: #eee;
+    border-bottom: solid 1px #ccc;
 }
 #zoombox {
     height: 20px;
@@ -216,11 +231,13 @@ tr:first-child
 }
 .result-table {
     border-top: 1px solid #999;
+    border-bottom: 1px solid #999;
     width: 100%;
     float: left;
     clear: both;
     margin-top: 25px;
     text-align: left;
+    padding-bottom: 10px;
 }
 .result-table th {
     font-weight: normal;
