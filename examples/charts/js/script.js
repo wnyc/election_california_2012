@@ -1023,7 +1023,7 @@ $(document).ready(function(){
 
             }
             $('.button').removeClass('button-selected');
-            $('#' + body + '-button').addClass('button-selected');
+            $('#' + body.replace(".","") + '-button').addClass('button-selected');
             
 
         }
@@ -1065,7 +1065,8 @@ $(document).ready(function(){
 
         });
         $('.button').click(function(){
-            var which_body = $(this).attr('id').split("-")[0];
+            var the_id = $(this).attr('id').split("-")[0];
+            var which_body = the_id.substr(0,2) + '.' + the_id.substr(2);
             config.set({body: which_body});
 
         });

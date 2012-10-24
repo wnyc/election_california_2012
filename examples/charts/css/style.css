@@ -115,6 +115,12 @@ tr:first-child
     float: left;
 
 }
+#prop-table {
+    overflow-y: scroll;
+    height: 400px;
+    width: 100%;
+
+}
 #prop-table-head {
     margin-top: 10px;
     margin-bottom: 15px;
@@ -209,7 +215,6 @@ tr:first-child
     width: 350px;
     margin-top: 20px;
     height: 501px;
-    overflow-y: auto;
 
 }
 
@@ -275,6 +280,10 @@ tr:first-child
     clear: both;
 }
 
+#proposition-contest-results {
+    position: relative;
+
+}
 .contest-basics {
     float: left;
     clear: both;
