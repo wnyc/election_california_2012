@@ -18,6 +18,29 @@ $(document).ready(function(){
     Handlebars.registerHelper('county_results_template', county_results_template);
     Handlebars.registerHelper('add_commas', addCommas);
 
+    function scale_page(){
+        var width = $(window).width();
+        if (width > 725)
+        {
+            $('body').css('width', 725);
+            return;
+        }
+        if (width < 725)
+        {
+            $('.button').css('width', '99px');
+            $('#zoom').css({'width': '245px',
+            'height' : '40px'});
+            $('#map-canvas').css('width', '255px');
+            $('#zoombox').css({
+                'margin-left': '0px',
+                'width' : '230px'});
+            $('#map_and_zoom').css('width', '250px');
+            $('body').css('width', '625');
+        }
+
+    }
+    scale_page();
+
     function addCommas(nStr)
     {
         // Public domain code from http://www.mredkj.com/javascript/nfbasic.html
@@ -86,7 +109,7 @@ $(document).ready(function(){
             showsenate: false,
             showushouse: false,
             map: typeof google != "undefined" ? new google.maps.Map(document.getElementById("map-canvas"), {
-                center: new google.maps.LatLng(38.5, -121.5), // near Sacramento
+                center: new google.maps.LatLng(38.5, -120), // near Sacramento
                 zoom: 5,
                 mapTypeId: google.maps.MapTypeId.ROADMAP,
                 styles: map_styles,
