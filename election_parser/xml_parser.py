@@ -54,7 +54,8 @@ class GenericParser:
         bodies = {}
         parsed_data_root = {
             "format": ["adapted_sos_1"],
-            "bodies": bodies
+            "bodies": bodies,
+            "issuedate" : self.issuedate(root)
             }
         contest_list = self.contests(root)
         for con in contest_list:
@@ -66,6 +67,9 @@ class GenericParser:
 
             contests[condata['title']] = condata 
         return parsed_data_root
+
+    def issuedate(self, root):
+        return root.find("./IssueDate").text
 
     def candidates(self, contest):
         return contest.findall('./TotalVotes/Selection/Candidate')
