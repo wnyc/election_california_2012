@@ -1,6 +1,7 @@
 var config;
-
+var election;
 $(document).ready(function(){
+    var router;
     var statewide_contest_template = Handlebars.compile($("#statewide-contest-template").html());
     var district_contest_template = Handlebars.compile($("#district-contest-template").html());
     var county_results_template = Handlebars.compile($("#county-results-template").html());
@@ -8,10 +9,8 @@ $(document).ready(function(){
     var result_table_template = Handlebars.compile($("#result-table-template").html());
     var proposition_results_template = Handlebars.compile($("#proposition-results-template").html());
     var proposition_row_template = Handlebars.compile($("#proposition-row-template").html());
-    var election;
-    var router;
     var REP_HI = "#f40b0b", REP_MED = "#ff6666", REP_LO = "#ffb0b0", DEM_HI = "#b6ecff", DEM_MED = "#6cceff", DEM_LO = "#009eff";
-    var YES_HI = "#a00000", YES_LO = "#ea0000", NO_HI = "#aad607", NO_LO = '#4b8402';
+    var NO_HI = "#a00000", NO_LO = "#ea0000", YES_HI = "#aad607", YES_LO = '#4b8402';
     
     var presidential_view, ussenate_view, ushouse_view, casenate_view, caassembly_view, propositions_view;
     var county_map_view, assembly_map_view, ushouse_map_view, casenate_map_view;
@@ -81,6 +80,7 @@ $(document).ready(function(){
             body : "",
             contest: 0,
             county: 0,
+            timeval: "",
             showcounties: false,
             showassembly: false,
             showsenate: false,
@@ -109,9 +109,12 @@ $(document).ready(function(){
             var the_election = this;
             _.each(bodies, function(body, name)
             {
-                var newbody = new Body({ name : name, title: body.title });
-                the_election.add(newbody);
-                newbody.parse_contests(body.contests);
+                var election_body = election.find(function(b){return b.get("name") == name;});
+                if (!election_body){
+                    election_body = new Body({ name : name, title: body.title });
+                    the_election.add(election_body);
+                }
+                election_body.parse_contests(body.contests);
 
             });
 
@@ -126,20 +129,29 @@ $(document).ready(function(){
 
         parse_contests : function(contests){
             var the_body = this;
-            var the_contests = new Contests();
+            var the_contests = the_body.get("contests");
+            if (!the_contests)
+            {
+                the_contests = new Contests();
+            }
 
             _.each(contests, function (contest, name)
             {
-                var newcontest = new Contest({
-                    name: name,
-                    body: the_body,
-                    longname: contest.longname,
-                    geo: contest.geo,
-                    precincts_total: contest.precincts.total,
-                    precincts_reporting: contest.precincts.reporting,
-                    measure_number: +contest.measure_number,
-                    precincts_reporting_percent: contest.precincts.reporting_percent
-                });
+                var newcontest = the_contests.find(function(c){return c.get("name") == name;});
+                if (!newcontest)
+                {
+                    newcontest = new Contest();
+                }
+                newcontest.set({
+                        name: name,
+                        body: the_body,
+                        longname: contest.longname,
+                        geo: contest.geo,
+                        precincts_total: contest.precincts.total,
+                        precincts_reporting: contest.precincts.reporting,
+                        measure_number: +contest.measure_number,
+                        precincts_reporting_percent: contest.precincts.reporting_percent
+                    });
                 newcontest.parse_candidates(contest.candidates);
                 if (_.has(contest, 'counties'))
                 {
@@ -442,6 +454,17 @@ $(document).ready(function(){
             var total = proposition.candidates[0].votes + proposition.candidates[1].votes;
             proposition.candidates[0].vote_percent = (100 * proposition.candidates[0].votes / total).toFixed(1);
             proposition.candidates[1].vote_percent = (100 * proposition.candidates[1].votes / total).toFixed(1);
+
+            // Use zero percents for consistency with state-reported zero county totals
+            if (isNaN(proposition.candidates[0].vote_percent))
+            {
+                proposition.candidates[0].vote_percent = 0;
+            }
+            if (isNaN(proposition.candidates[1].vote_percent))
+            {
+                proposition.candidates[1].vote_percent = 0;
+            }
+                
             proposition.total_votes = total;
 
             var county = config.get("county");
@@ -983,7 +1006,7 @@ $(document).ready(function(){
     });
 
 
-    $.getJSON("data/foo.json", function(data)
+    $.getJSON("data/election_data.json", function(data)
     {
         election = new Election();
         election.parse_bodies(data.bodies);
@@ -1001,12 +1024,18 @@ $(document).ready(function(){
         casenate_map_view = new CASenateMapView();
         router = new Router();
         config = new Config();
+        $('#timeval').html(data.issuedate);
 
         config.on("change:contest change:county", function(){
             router.navigate("#body/" + config.get("body") + "/" + config.get("contest") + "/" + config.get("county"), {trigger: true});
         });
-        config.on("change:body", function(){
+        config.on("change:body change:timeval", function(){
             router.navigate("#body/" + config.get("body"), {trigger: true});
+            config.redraw_features();
+
+        });
+        election.on("change", function(){
+            router.navigate("#body/" + config.get("body") + "/" + config.get("contest") + "/" + config.get("county"), {trigger: true});
             config.redraw_features();
 
         });
@@ -1028,6 +1057,19 @@ $(document).ready(function(){
             // By default start with presidential with no specific county
             config.set({body: "us.president"});
         }
+
+        setInterval(function(){
+            $.getJSON("data/election_data.json", function(data)
+            {
+                election.parse_bodies(data.bodies);
+                config.set({timeval: data.issuedate});
+                config.redraw_features();
+                $('#timeval').html(data.issuedate);
+
+
+            });
+
+        }, 1000 * 60 * 3);
 
 
 

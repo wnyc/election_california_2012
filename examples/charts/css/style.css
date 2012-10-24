@@ -2,6 +2,19 @@ body {
     font-family: "Helvetica", Arial, sans-serif;
 
 }
+#election_header {
+    font-size: 24;
+    display: inline;
+
+}
+#timestamp {
+    color: #F66;
+    position:absolute;
+    right:0;
+    font-size: 12px;
+    display: inline;
+
+}
 div .propselected {
     background-color: yellow;
     float: left;
