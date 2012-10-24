@@ -2,6 +2,55 @@ body {
     font-family: "Helvetica", Arial, sans-serif;
 
 }
+.boxtitle {
+    font-weight: bold;
+    float: left;
+}
+.boxcontent {
+    float: left;
+    padding-top: 5px;
+
+}
+.closebutton {
+    float: right;
+
+}
+
+.popoutbox {
+    position: absolute;
+    padding: 10px;
+    font-size: 12px;
+    left: 33%;
+    top: 33%;
+    width: 50%;
+    height: 33%;
+    z-index: 5;
+    border: solid 1px #ccc;
+    background-color: white;
+    display: none;
+
+}
+#page_footer {
+    font-size: 12px;
+    float: left;
+    width: 100%;
+    border-top: solid 1px #999;
+    width: 100;
+    margin-top: 10px;
+    padding-top: 5px;
+}
+#datafooter {
+    color: #999;
+    float: left;
+}
+#embedlink {
+    float: right;
+    margin-right: 5px;
+}
+#creditlink {
+    float: right;
+
+}
 #county-percent-reporting,#county-percent {
     float: right;
     font-size: 12px;
@@ -88,6 +137,7 @@ tr:first-child
     word-spacing: 15px;
     padding-top: 15px;
     margin-left: 5px;
+    font-size: 12px;
 
 }
 .prop_top_number {
@@ -158,7 +208,7 @@ tr:first-child
     float: left;
     width: 350px;
     margin-top: 20px;
-    height: 400px;
+    height: 501px;
     overflow-y: auto;
 
 }
@@ -167,18 +217,18 @@ tr:first-child
     float: left;
     width: 350px;
     margin-left: 5px;
-    height: 600px;
+    height: 501px;
     margin-top: 20px;
 
 }
 #map-canvas {
     float: left;
-    width: 375px;
-    height: 400px;
+    width: 355px;
+    height: 450px;
 }
 #zoom {
     height: 30px;
-    width: 365px;
+    width: 345px;
     float: left;
     padding-left: 10px;
     padding-top: 10px;

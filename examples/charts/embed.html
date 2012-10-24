@@ -7,7 +7,7 @@
   <script type="text/javascript">var _sf_startpt=(new
   Date()).getTime()</script>
   
-<title>Offshore Oil | WNYC</title> 
+<title>California Election Results | WNYC</title> 
 
 <link rel="stylesheet" href="css/style.css" type="text/css" media="screen" title="no title" charset="utf-8">
 <script type="text/javascript" src="http://maps.google.com/maps/api/js?v=3.4&sensor=false"></script>
@@ -19,6 +19,7 @@
 <script type="text/javascript" src="js/moment.min.js"></script>
 <script src="js/gmap-features.js" type="text/javascript" charset="utf-8"></script>
 <script src="js/google_baselayer.js" type="text/javascript" charset="utf-8"></script>
+<script src="js/boxes.js" type="text/javascript" charset="utf-8"></script>
 <script src="js/script.js" type="text/javascript" charset="utf-8"></script>
 
 
@@ -70,7 +71,40 @@ s.parentNode.insertBefore(ga, s);
     </div>
     <div id="map-canvas"></div>
 </div>
-<!-- Put legend here -->
+
+<div id="page_footer">
+<div id="datafooter">
+<b>Data from</b> California Secretary of State
+</div>
+<a id="creditlink" href="javascript:void(0);" onclick="creditbox();">
+Credits
+</a>
+<a id="embedlink" href="javascript:void(0);" onclick="embedlink();">
+Embed
+</a> 
+
+
+</div>
+</div> <!-- container -->
+
+<div id="creditbox" class="popoutbox">
+    <div class="boxtitle">
+        Credits
+    </div>
+    <a class="closebutton" href="javascript:void(0);" onclick="closebox();">Close</a>
+    <div class="boxcontent">
+        Built by Adam DePrice, Schuyler Duveen, Louise Ma, Steven Melendez, Glenn Mohre/WNYC
+    </div>
+</div>
+<div id="embedbox" class="popoutbox">
+    <div class="boxtitle">
+        Embed Link
+    </div>
+    <a class="closebutton" href="javascript:void(0);" onclick="closebox();">Close</a>
+    <div class="boxcontent" id="embedcode">
+    
+    </div>
+</div>
 
 <!-- General template for row of results -->
 <script type="text/x-handlebars-template" id="result-row-template">
