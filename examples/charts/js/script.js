@@ -1024,7 +1024,7 @@ $(document).ready(function(){
         casenate_map_view = new CASenateMapView();
         router = new Router();
         config = new Config();
-        $('#timeval').html(data.issuedate);
+        $('#timeval').html(moment(data.issuedate).format("LLL"));
 
         config.on("change:contest change:county", function(){
             router.navigate("#body/" + config.get("body") + "/" + config.get("contest") + "/" + config.get("county"), {trigger: true});
@@ -1064,12 +1064,12 @@ $(document).ready(function(){
                 election.parse_bodies(data.bodies);
                 config.set({timeval: data.issuedate});
                 config.redraw_features();
-                $('#timeval').html(data.issuedate);
+                $('#timeval').html(moment(data.issuedate).format("LLL"));
 
 
             });
 
-        }, 1000 * 60 * 3);
+        }, 1000);// * 60 * 3);
 
 
 
