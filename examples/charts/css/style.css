@@ -2,6 +2,18 @@ body {
     font-family: "Helvetica", Arial, sans-serif;
 
 }
+#county-percent-reporting {
+    float: right;
+
+}
+#statewide-contest-county {
+
+}
+#county-title {
+    font-weight: bold;
+    float: left;
+    padding-top: 15px;
+}
 #election_header {
     font-size: 24;
     display: inline;
