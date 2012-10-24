@@ -372,16 +372,18 @@ $(document).ready(function(){
 
             if (_.isUndefined(contest))
             {
-                // Just take the first one
-
-                contest = m.get("contests").first();
+                $(this.el).html('<div id="mouseovernotice">Mouse over a district to see results</div>');
+                
             }
-            var json = contest.toJSON();
-            json.candidates = json.candidates.toJSON();
-            json.body_title = title;
+            else
+            {
+                var json = contest.toJSON();
+                json.candidates = json.candidates.toJSON();
+                json.body_title = title;
+                $(this.el).html(district_contest_template(json));
+            }
 
 
-            $(this.el).html(district_contest_template(json));
             $('#chart-canvas').html($(this.el)); 
 
         }
@@ -814,7 +816,7 @@ $(document).ready(function(){
 
                         },
                         unhighlightCallback : function () {
-                            config.set({contest: ''});
+                            config.set({contest: '0'});
                             config.redraw_feature_set(feature_name);
 
 
@@ -960,32 +962,32 @@ $(document).ready(function(){
                     showassembly: false,
                     showsenate: false,
                     showushouse: true,
-                    county: ''
+                    county: '0'
 
                 });
             }
             else if (body == "ca.senate")
             {
-                casenate_view.render(contest || 1);
+                casenate_view.render(contest || 0);
                 config.set({
                     showcounties: false,
                     showassembly: false,
                     showsenate: true,
                     showushouse: false,
-                    county: ''
+                    county: '0'
 
                 });
             }
             else if (body == "ca.assembly")
             {
-                caassembly_view.render(contest || 1);
+                caassembly_view.render(contest || 0);
                 config.set({body : 'ca.assembly'});
                 config.set({
                     showcounties: false,
                     showassembly: true,
                     showsenate: false,
                     showushouse: false,
-                    county: ''
+                    county: '0'
 
                 });
             }
@@ -1058,7 +1060,7 @@ $(document).ready(function(){
 
         });
         election.on("change", function(){
-            router.navigate("#body/" + config.get("body") + "/" + config.get("contest") + "/" + config.get("county"), {trigger: true});
+            router.navigate("#body/" + config.get("body") + "/" + config.get("contest") + "/" + (config.get("county") || 0), {trigger: true});
             config.redraw_features();
 
         });
