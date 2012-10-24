@@ -63,6 +63,7 @@ body {
     float: left;
     width: 100%;
     padding-top: 5px;
+    margin-top: 5px;
 
 }
 #county-title {
@@ -117,6 +118,7 @@ tr:first-child
 }
 #prop-table {
     overflow-y: scroll;
+    overflow-x: hidden;
     height: 400px;
     width: 100%;
 
@@ -142,6 +144,7 @@ tr:first-child
     clear: both;
     word-spacing: 15px;
     padding-top: 15px;
+    margin-bottom: 10px;
     margin-left: 5px;
     font-size: 12px;
 
@@ -176,7 +179,7 @@ tr:first-child
 }
 .prop_top_candidate, .prop_top_percent {
     float: left;
-    width: 50%;
+    width: 40%;
 }
 
 
@@ -290,7 +293,6 @@ tr:first-child
 }
 .result-table {
     border-top: 1px solid #999;
-    border-bottom: 1px solid #999;
     width: 100%;
     float: left;
     clear: both;
