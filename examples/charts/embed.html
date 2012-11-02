@@ -45,56 +45,61 @@ s.parentNode.insertBefore(ga, s);
 
 </head> 
 
-
 <body style="background:white">
 
 <!-- MAP TOP -->
 
-    
-<div style="font-size: 36px; color: red"><blink>TEST DATA - DO NOT USE! </blink></div>
-<span id="election_header">California Election</span>
-<div id="timestamp"><b>Updated </b><span id="timeval">today</span></div>
+<div id="tester" style="font-size: 36px; color: red"><blink>TEST DATA - DO NOT USE! </blink></div>
+
+<div id="header">
+	<h1>California Election</h1>
+	<div id="timestamp"><b>TEST DATA ONLY as of </b><span id="timeval">today</span></div>
+	<div id="updated"></div>
+	<div id="buttons">
+	    <div class="button" id="uspresident-button">Presidential</div>
+	    <div class="button" id="ussenate-button">US Senate</div>
+	    <div class="button" id="ushouse-button">US House</div>
+	    <div class="button" id="casenate-button">CA Senate</div>
+	    <div class="button" id="caassembly-button">CA Assembly</div>
+	    <div class="button" id="capropositions-button">Propositions</div>
+	</div>
+</div><!--#header-->
+
 <div id="container">
-<div id="updated"></div>
-<div id="buttons">
-    <div class="button" id="uspresident-button">Presidential</div>
-    <div class="button" id="ussenate-button">US Senate</div>
-    <div class="button" id="ushouse-button">US House</div>
-    <div class="button" id="casenate-button">CA Senate</div>
-    <div class="button" id="caassembly-button">CA Assembly</div>
-    <div class="button" id="capropositions-button">Propositions</div>
-</div>
-<div id="chart-canvas"></div>
-<div id="map_and_zoom">
-    <div id="zoom">
-        <label id="zoomlabel">Zoom to your address</label>
-        <input type="text" id="zoombox" value="" name="zoombox"></input>
-    </div>
-    <div id="map-canvas"></div>
-</div>
+	<div id="chart-canvas"></div>
+        <div id="map_zoom_wrapper">
+            <div id="map_and_zoom">
+                <div id="zoom">
+                    <label id="zoomlabel">Zoom to your address</label>
+                    <input type="text" id="zoombox" value="" name="zoombox"></input>
+                </div>
+            <div id="map-canvas"></div>
+            <div id="zoom_links">
+                <a href="javascript:void(0);" id="zoomsf">Zoom to SF</a>
+                <a href="javascript:void(0);" id="zoomla">Zoom to LA</a>
+            </div>
+        </div>
+</div><!-- container -->
 
 <div id="page_footer">
-<div id="datafooter">
-<b>Data from</b> California Secretary of State
-</div>
-<a id="creditlink" href="javascript:void(0);" onclick="creditbox();">
-Credits
-</a>
-<a id="embedlink" href="javascript:void(0);" onclick="embedlink();">
-Embed
-</a> 
-
-
-</div>
-</div> <!-- container -->
+	<div id="datafooter">
+		<b>Data from</b> California Secretary of State
+	</div>
+	<a id="creditlink" href="javascript:void(0);" onclick="creditbox();">Credits</a>
+	<a id="embedlink" href="javascript:void(0);" onclick="embedlink();">Embed</a> 
+</div><!-- footer -->
 
 <div id="creditbox" class="popoutbox">
+	 <a class="closebutton" href="javascript:void(0);" onclick="closebox();">Close</a>
     <div class="boxtitle">
         Credits
     </div>
-    <a class="closebutton" href="javascript:void(0);" onclick="closebox();">Close</a>
     <div class="boxcontent">
-        Built by Adam DePrice, Schuyler Duveen, Louise Ma, Steven Melendez, Glenn Mohre/WNYC
+        <p>This is a joint project of public radio stations <a href="http://www.scpr.org/" title="89.3 KPCC - Southern California Public Radio" target="_blank">KPCC</a> and <a href="http://www.wnyc.org/" title="Home - WNYC" target="_blank">WNYC</a> with support from <a href="http://www.mozillaopennews.org/" title="Knight-Mozilla OpenNews -- Building an ecosystem for open web development in journalism | Knight-Mozilla OpenNews" target="_blank">Knight-Mozilla OpenNews</a>.
+     </p>
+        <p>The map uses open data provided by the <a href="http://www.sos.ca.gov/media/" title="Media Guide - November 6, 2012, General Election - California Secretary of State" target="_blank">California Secretary of State's office</a>.</p>
+        <p>It was built by Adam DePrice, Schuyler Duveen, John Keefe, Louise Ma, Steven Melendez, Glenn Mohre at WNYC in close coordination with Kim Bui and Sean Dillingham at KPCC.</p>
+        <p>You are free to use the <a href="https://github.com/wnyc/election_california_2012" target="_blank">open source code</a> for this project, the <a href="http://project.wnyc.org/election-2012-ca-results/data/election_data.json" title="">live json file</a> full of results data and the <a href="http://project.wnyc.org/election-2012-ca-results/data/election_jsonp.js" title="" target="_blank">live jsonp file</a>. Because of the experimental nature of this project, and the speed with which it was put together, nobody and no organization involved offers any warranty that it is free of errors or will work perfectly -- if at all.</p>
     </div>
 </div>
 <div id="embedbox" class="popoutbox">
@@ -135,7 +140,7 @@ Embed
         <tbody>
         {{#each candidates}}
             <tr>
-                <td>
+                <td class="candNames">
                     {{ballot_name}} 
                     {{#if incumbent}}
                     <!-- incumbent marker -->
@@ -148,9 +153,9 @@ Embed
 
                     {{/if}}
                 </td>
-                <td>{{party}}</td>
-                <td>{{add_commas votes}}</td>
-                <td class="table-right">{{vote_percent}}%</td>
+                <td class="resultsData">{{party}}</td>
+                <td class="resultsData">{{add_commas votes}}</td>
+                <td class="resultsData table-right">{{vote_percent}}%</td>
             </tr>
 
         {{/each}}
@@ -159,8 +164,8 @@ Embed
         </tbody>
     </table>
     <div id="results-table-icons">
-    <img src="images/icon_incumb.png"></img>incumbent
-    <img src="images/icon_winner.png"></img> winner
+    <img src="images/icon_incumb.png"></img> <span class="incumb">incumbent</span>
+    <img src="images/icon_winner.png"></img> <span class="winner">winner</span>
 
     </div>
 <!-- incumbent/winner key will go here -->
@@ -181,7 +186,8 @@ Embed
         </div>
     </div>
 
-    <div class="prop-drawer description-drawer" id="prop-description-{{measure_number}}">
+    <div class="prop-drawer description-drawer prop{{selected}}" id="prop-description-{{measure_number}}">
+        {{description}}
     </div>
     <div class="prop-drawer county-drawer prop{{selected}}" id="prop-county-{{measure_number}}">
         {{#if county_results}}
@@ -236,8 +242,8 @@ Embed
 <script type="text/x-handlebars-template" id="county-results-template">
     <div id="county-title">{{title}}</div>
     <div id="county-percent-reporting">
-        <div class="percent-reporting" id="county-percent">{{precincts_reporting_percent}}%</div>
-        <div class="reporting-detail" id="county-reporting">reporting</div>
+        <span id="county-percent">{{precincts_reporting_percent}}%</span> 
+        <span id="county-reporting">reporting</span>
     </div>
     <div class="result-table-div">
         {{{result_table_template this}}}

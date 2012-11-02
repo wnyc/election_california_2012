@@ -1,3 +1,7 @@
+#tester {
+	display: none;
+}
+
 body {
     font-family: "Helvetica", Arial, sans-serif;
 
@@ -19,21 +23,23 @@ body {
     float: left;
     padding-top: 15px;
     padding-bottom: 15px;
-
 }
-.closebutton {
+a.closebutton {
     float: right;
-
-}
+	color: #3366cc;
+	}
+	a.closebutton:hover {
+		color: #ff6666;
+	}
 
 .popoutbox {
     position: absolute;
     padding: 10px;
     font-size: 12px;
-    left: 33%;
-    top: 33%;
-    width: 50%;
-    height: 33%;
+    left: 15%;
+    top: 30%;
+    width: 70%;
+    height: 30%;
     z-index: 5;
     border: solid 1px #ccc;
     background-color: white;
@@ -41,101 +47,137 @@ body {
 
 }
 #page_footer {
+	clear: both;
     font-size: 12px;
-    float: left;
     width: 100%;
-    border-top: solid 1px #999;
-    margin-top: 10px;
+    border-top: solid 1px #ccc;
+    margin-top: 15px;
     padding-top: 5px;
 }
-#datafooter {
-    color: #999;
-    float: left;
+	#page_footer a {
+		color: #3366cc;
+		float: right;
+	}
+	#page_footer a:hover {
+		color: #ff6666;
+	}
+	#datafooter {
+	    color: #999;
+	    float: left;
+	}
+	#embedlink {
+	    margin-right: 15px;
+	}
+	#creditlink {
+	    margin-right: 10px;
+	}
+	
+#header {
+	border-top: 4px solid #000;
+	padding: 4px 0 0 0;
 }
-#embedlink {
-    float: right;
-    margin-right: 5px;
+	#header h1 {
+		margin: 0 0 30px 0;
+		padding: 0 0 0 0;
+		width: 360px;
+		height: 31px;
+		background: url('../images/header.png') no-repeat;
+		text-indent: -9999px;
+		overflow: hidden;
+		float: left;
+	}
+	#timestamp {
+	    color: #F66;
+	    float: right;
+	    font-size: 12px;
+		margin: 5px 10px 0 0;
+	}
+	
+	#buttons {
+	    width: 725px;
+	    display: block;
+	    clear: both;
+	    z-index: 2;
+	    border-bottom: 2px solid #ff6666;
+		overflow: hidden;
+	}
+		.button {
+		    font-size: 12px;
+		    color: #fff;
+		    background-color: #3366cc;
+		    display: inline;
+		    border-right: 1px solid white;
+			padding: 5px 0 20px 5px;
+		    text-align: left;
+		    float: left;
+		    width: 114px;
+		}
+			.button:hover {
+			    background-color: #ff6666;
+				cursor: pointer;
+			}
+			.button-selected {
+			    background-color: #ff6666;
+			}
+			
+#container {
+	overflow: hidden;
 }
-#creditlink {
-    float: right;
-    margin-right: 15px;
-
-}
-#county-percent-reporting,#county-percent {
-    float: right;
-    font-size: 12px;
-    line-height: 18px;
-    color: #999;
-
-}
-#statewide-contest-county {
-    border-top: solid 3px;
-    float: left;
-    width: 100%;
-    padding-top: 5px;
-    margin-top: 5px;
-
-}
-#county-title {
-    font-weight: bold;
-    float: left;
-}
-#election_header {
-    font-size: 24px;
-    display: inline;
-
-}
-#timestamp {
-    color: #F66;
-    float: right;
-    font-size: 12px;
-    display: inline;
+	
+.description-drawer {
+    font-size: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 10px;
+    padding-bottom: 5px;
+    border-top: solid white 1px;
 
 }
 div .propselected {
-    background-color: yellow;
+    background-color: #ffff99;
     float: left;
     display: block;
     width: 100%;
+}
+.propselected .description-drawer, .propselected .detailed-results-drawer {
+    background-color: #ffff99;
+    float: left;
+    display: block;
+    width: 100%;
+    
 
 }
 .hidebutton {
     float: left;
-
 }
 tr:first-child 
 {
 
 }
 .county-drawer {
-    margin-bottom: 20px;
+    padding-bottom: 10px;
 }
 .prop_vote_count {
- margin-left: 10%;
- width: 80%;
-
+	margin-left: 10%;
+	width: 80%;
 }
 .prop_percent_reporting {
     margin-left: 10%;
     float: left;
     width: 75%;
-
 }
 .prop-table-label {
     float: left;
-
 }
 #prop-table {
     overflow-y: scroll;
     overflow-x: hidden;
     height: 400px;
     width: 100%;
-
 }
 #prop-table-head {
     margin-top: 10px;
     margin-bottom: 15px;
-
 }
 
 #prop-number-label {
@@ -143,7 +185,6 @@ tr:first-child
 }
 #prop-proposition-label {
     width: 60%;
-
 }
 #prop-results-label {
     width: 30%;
@@ -156,31 +197,41 @@ tr:first-child
     margin-bottom: 10px;
     margin-left: 5px;
     font-size: 12px;
-
+    width: 100%;
 }
 .prop_top_number {
     width: 10%;
     font-weight: bold;
     float: left;
 }
-.prop_top_name,.prop_county_name {
-    width: 60%;
+.prop_top_name, .prop_county_name {
+    width: 55%;
     float: left;
-
+	padding-right: 10px;
 }
+a.prop_top_name {
+	color: #3366cc;
+	text-decoration: none;
+	font-size: 14px;
+	font-weight: bold;
+}
+	a.prop_top_name:hover {
+		a: #ff6666;
+		text-decoration: underline;
+	}
 .prop_county_name {
     padding-left: 10%;
-
+	font-size: 14px;
 }
 .prop_top_votes {
     width: 30%;
     float: left;
+	font-size: 12px;
 }
 .prop_top_row {
     width: 100%;
     float: left;
     clear: both;
-
 }
 .prop_top_vote {
     float: left;
@@ -191,61 +242,46 @@ tr:first-child
     width: 40%;
 }
 
-
-
-.button {
-    font-size: 12px;
-    color: white;
-    background-color: #3366cc;
-    display: inline;
-    border-right: 1px solid white;
-    padding-left: 2px;
-    padding-top: 2px;
-    padding-bottom: 15px;
-    padding-right: 0px;
-    text-align: left;
-    float: left;
-    width: 117px;
-    border-bottom: 2px solid #ff6666;
-}
-.button:hover {
-    background-color: #ff6666;
-}
-.button-selected {
-    background-color: #ff6666;
-
-}
-#buttons {
-    width: 725px;
-    display: block;
-    clear: both;
-    z-index: 2;
-
-}
 #chart-canvas {
     float: left;
     width: 350px;
     margin-top: 20px;
     height: 501px;
-
 }
 
 #map_and_zoom {
     float: left;
-    width: 350px;
-    margin-left: 5px;
-    height: 501px;
+    width: 355px;
+    height: 451px;
+    border: solid 1px #989898;
+}
+#zoom_links {
+float: right;
+font-size: 10px;
+    padding-top: 5px;
+
+
+}
+#zoom_links a {
+    color: #36C;
+    padding-left: 5px;
+}
+#map_zoom_wrapper {
+    padding: 1px;
+    background-color: #d5d5d5;
+    float: left;
     margin-top: 20px;
+    margin-left: 8px;
 
 }
 #map-canvas {
     float: left;
     width: 355px;
-    height: 450px;
+    height: 400px;
 }
 #zoom {
     height: 30px;
-    width: 345px;
+    width: 355px;
     float: left;
     padding-left: 10px;
     padding-top: 10px;
@@ -258,50 +294,74 @@ tr:first-child
     height: 20px;
     width: 200px;
     margin-left: 5px;
-
+    
 }
-
+#contest-pretitle {
+	font-size: 14px;
+}
 #contest-title {
-    font-size: 36px;
+    font-size: 30px;
     font-weight: bold;
 }
 #statewide-contest-results #contest-district, #contest-pretitle {
     font-weight: bold;
-
 }
-
 #contest-percent-reporting {
     float: right;
-    color: #999;
+    color: #ccc;
 }
 .detailed-results-drawer {
     color: #999;
     font-size: 12px;
     line-height: 18px;
-
 }
 .percent-reporting {
-    font-size: 24px;
+    font-size: 30px;
     float: right;
     clear: both;
-
+	font-weight: bold;
 }
 .reporting-detail {
-    font-size: 12px;
+    font-size: 14px;
     float: right;
     clear: both;
 }
+
+#statewide-contest-county {
+	border-top: solid 3px;
+	float: left;
+	width: 100%;
+	padding-top: 5px;
+	margin-top: 5px;
+}
+#county-title {
+	font-weight: bold;
+	float: left;
+}
+#county-percent-reporting {
+	float: right;
+	font-size: 12px;
+	line-height: 18px;
+	color: #999;
+	font-weight: normal;
+}
+#county-percent-reporting #county-percent {
+	font-weight: bold;
+}
+span.winner {
+	color: #cc9933;
+}
+
 
 #proposition-contest-results {
     position: relative;
-
 }
 .contest-basics {
     float: left;
     clear: both;
 }
 .result-table {
-    border-top: 1px solid #999;
+    border-top: 1px solid #ccc;
     width: 100%;
     float: left;
     clear: both;
@@ -318,16 +378,19 @@ tr:first-child
     font-weight: normal;
     color: #999;
     font-size: 12px;
-
 }
 .result-table tr {
     height: 25px;
-
+}
+.result-table td.candNames {
+	font-size: 14px;
+}
+.result-table td.resultsData {
+	font-size: 12px;
 }
 
 .table-right {
     text-align: right;
-
 }
 .prop-drawer {
     display: none;
@@ -338,29 +401,42 @@ tr:first-child
 .prop-row {
     margin-top: 10px;
     margin-bottom: 10px;
-
+}
+#mouseovernotice {
+	text-align: center;
+	background: #f4f4f4;
+	height: 453px;
+	position: relative;
+}
+#mouseovernotice p {
+	position: absolute;
+	text-align: center;
+	top: 50%;
+	height: 20px;
+	margin-top: -10px;
+	left: 50%;
+	width: 250px;
+	margin-left: -125px;
 }
 
 @media all and (min-width: 600px) {
     .button {
-        width: 99px;
+        width: 97px;
     }
     #zoom {
-        width: 245px;
-        height: 40px;
+        width: 235px;
+        height: 30px;
     }
     #map-canvas {
-        width: 255px;
+        width: 245px;
     }
     #zoombox {
         margin-left: 0px;
-        width: 230px;
-
+        width: 220px;
     }
     #map_and_zoom {
-        width: 250px;
+        width: 246px;
     }
-
     body {
         width: 625px;
     }
@@ -368,13 +444,8 @@ tr:first-child
 
 @media all and (min-width: 725px)
 {
-    body {
-
-        width: 725px;
-    }
     .button {
-        width: 117px;
-
+        width: 114px;
     }
     #zoom {
         height: 30px;
@@ -386,14 +457,16 @@ tr:first-child
     #zoombox {
         width: 200px;
         margin-left: 5px;
-
     }
     #map_and_zoom {
-        width: 250px;
+        width: 355px;
     }
-
     body {
         width: 725px;
+    }
+    #map_zoom_wrapper {
+        width: 357px;
+
     }
 }
 

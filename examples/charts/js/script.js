@@ -9,8 +9,8 @@ $(document).ready(function(){
     var result_table_template = Handlebars.compile($("#result-table-template").html());
     var proposition_results_template = Handlebars.compile($("#proposition-results-template").html());
     var proposition_row_template = Handlebars.compile($("#proposition-row-template").html());
-    var REP_HI = "#f40b0b", REP_MED = "#ff6666", REP_LO = "#ffb0b0", DEM_HI = "#b6ecff", DEM_MED = "#6cceff", DEM_LO = "#009eff";
-    var NO_HI = "#a00000", NO_LO = "#ea0000", YES_HI = "#aad607", YES_LO = '#4b8402';
+    var REP = "#ff6666", DEM = "#6cceff", NO = "#800000", YES = "#4b8402";
+
     
     var presidential_view, ussenate_view, ushouse_view, casenate_view, caassembly_view, propositions_view;
     var county_map_view, assembly_map_view, ushouse_map_view, casenate_map_view;
@@ -110,7 +110,7 @@ $(document).ready(function(){
             showsenate: false,
             showushouse: false,
             map: typeof google != "undefined" ? new google.maps.Map(document.getElementById("map-canvas"), {
-                center: new google.maps.LatLng(38.5, -120), // near Sacramento
+                center: new google.maps.LatLng(37.328, -119.6943), // near Sacramento
                 zoom: 5,
                 mapTypeId: google.maps.MapTypeId.ROADMAP,
                 styles: map_styles,
@@ -174,7 +174,7 @@ $(document).ready(function(){
                         precincts_total: contest.precincts.total,
                         precincts_reporting: contest.precincts.reporting,
                         measure_number: +contest.measure_number,
-                        precincts_reporting_percent: contest.precincts.reporting_percent
+                        precincts_reporting_percent: Math.round(contest.precincts.reporting_percent)
                     });
                 newcontest.parse_candidates(contest.candidates);
                 if (_.has(contest, 'counties'))
@@ -189,7 +189,7 @@ $(document).ready(function(){
                             candidates: county_votes_to_candidates(county.votes, newcontest.get("candidates")),
                             precincts_total: county.precincts.total,
                             precincts_reporting: county.precincts.reporting,
-                            precincts_reporting_percent: county.precincts.reporting_percent
+                            precincts_reporting_percent: Math.round(county.precincts.reporting_percent)
 
 
                         });
@@ -355,6 +355,11 @@ $(document).ready(function(){
         comparator: function(candidate)
         {
             // Sort them in decreasing order of vote percentage
+            // With "other" candidates first
+            if (candidate.get("name") == "Other")
+            {
+                return 1;
+            }
             return -1 * candidate.get("vote_percent");
 
         }
@@ -372,7 +377,7 @@ $(document).ready(function(){
 
             if (_.isUndefined(contest))
             {
-                $(this.el).html('<div id="mouseovernotice">Mouse over a district to see results</div>');
+                $(this.el).html('<div id="mouseovernotice"><p>Mouse over a district to see results</p></div>');
                 
             }
             else
@@ -458,21 +463,27 @@ $(document).ready(function(){
         },
 
         select: function(){
-            config.set({contest: this.model.get("measure_number")});
+            config.set({contest: this.model.get("measure_number")}, {silent: true});
             config.redraw_feature_set("county_features");
+            $('.propselected').removeClass('propselected');
+            this.$el.addClass('propselected');
         },
 
         unselect: function (){
             config.set({contest: 0});
             config.redraw_feature_set("county_features");
+            this.$el.removeClass('propselected');
 
         },
 
 
-        render: function(){
+        render: function(county_change_only){
             // model should be a proposition
             var proposition = this.model.toJSON();
+            this.model.view = this;
             proposition.selected = +config.get("contest") == this.model.get("measure_number") ? "selected" : "";
+            $('.propselected').removeClass('propselected');
+                
             // Always two candidates: yes and no
             proposition.candidates = proposition.candidates.toJSON();
             var total = proposition.candidates[0].votes + proposition.candidates[1].votes;
@@ -493,18 +504,26 @@ $(document).ready(function(){
 
             var county = config.get("county");
 
+            if (_.has(prop_descriptions, proposition.measure_number))
+            {
+                proposition.description = prop_descriptions[proposition.measure_number];
+            }
             if (county){
                 var county_results = proposition.counties.find(function(cty){return cty.get("title") == county;});
                 proposition.county_results = county_results.toJSON();
                 proposition.county_results.candidates = proposition.county_results.candidates.toJSON();
                 proposition.county_results.total_votes = proposition.county_results.candidates[0].votes + proposition.county_results.candidates[1].votes;
+                $(this.el).html(proposition_row_template(proposition));
 
 
             }
 
             $(this.el).html(proposition_row_template(proposition));
 
-            $('#prop-table').append($(this.el));
+            if (!county_change_only)
+            {
+                $('#prop-table').append($(this.el));
+            }
             this.delegateEvents();
             return this;
             
@@ -528,6 +547,7 @@ $(document).ready(function(){
                 var proposition_views = this.proposition_views = [];
                 this.propositions.each(function(proposition){
                     proposition_views.push(new PropositionView({model: proposition, id: 'prop-row-' + proposition.get("measure_number")}));
+                    
                 });
             }
                 
@@ -552,11 +572,6 @@ $(document).ready(function(){
         {
             return {visible: false, fillOpacity: 0, strokeWidth:0 };
         }
-        if (config.get("county") && !this.getHighlighted())
-        {
-            // If another county is selected
-            return {fillColor: "#999", fillOpacity: 0.7, strokeWidth: 1,visible: true };
-        }
         if (config.get("body") == "ca.propositions" && +config.get("contest") !== 0)
         {
             var proposition = +config.get("contest");
@@ -570,46 +585,22 @@ $(document).ready(function(){
             var county = contest.get("counties").find(function(c){
                 return c.get("title") == thecounty;
             });
-            if (county.get("precincts_reporting_percent") < 10)
-            {
-                // Insufficent data -- color it grey
-                return {fillColor: "#999", fillOpacity: 0.7, strokeWidth: 1,visible: true };
-            }
 
             var yes = county.get("candidates").find(function(c){return c.get("ballot_name") == "Yes";}).get("vote_percent");
             var fill_color;
 
-            if (yes > 80)
+            if (yes > 50)
             {
-                fill_color = YES_HI;
+                fill_color = YES;
             }
-
-            else if (yes > 50)
+            else if (yes < 50 && yes > 0)
             {
-                fill_color = YES_LO;
-            }
-            else if (yes < 20)
-            {
-                fill_color = NO_HI;
-            }
-            else if (yes < 50)
-            {
-                fill_color = NO_LO;
+                fill_color = NO;
             }
             else fill_color = "#999";
 
-            return {fillColor: fill_color, fillOpacity: 0.7, strokeWidth : 1, visible: true};
-
-
-
-
-            
-
-
-
-
+            return {fillColor: fill_color, fillOpacity: 0.7, visible: true};
         }
-
 
         // Red blue map
 
@@ -648,51 +639,26 @@ $(document).ready(function(){
                 rep_percent = rep.get("vote_percent");
             }
 
-            if (rep_percent > 80)
+            var fillColor;
+            if (rep_percent > dem_percent)
             {
-                return {fillColor: REP_HI, fillOpacity: 0.7, strokeWidth: 1,visible: true };
+                fillColor = REP;
             }
-            else if (rep_percent > 60)
+            else if (dem_percent > rep_percent)
             {
-                return {fillColor: REP_MED, fillOpacity: 0.7, strokeWidth: 1,visible: true };
+                fillColor = DEM;
             }
-            else if (rep_percent > 50)
-            {
-                return {fillColor: REP_LO, fillOpacity: 0.7, strokeWidth: 1,visible: true };
-            }
-
-            else if (dem_percent > 80)
-            {
-                return {fillColor: DEM_HI, fillOpacity: 0.7, strokeWidth: 1,visible: true };
-            }
-            else if (dem_percent > 60)
-            {
-                return {fillColor: DEM_MED, fillOpacity: 0.7, strokeWidth: 1,visible: true };
-            }
-            else if (dem_percent > 50)
-            {
-                return {fillColor: DEM_LO, fillOpacity: 0.7, strokeWidth: 1,visible: true };
-            }
-            else
-            {
-                return {fillColor: "#999", fillOpacity: 0.7, strokeWidth: 1,visible: true };
-            }
-
-
-
-
-
-
+            else fillColor = "#999";
                 
 
-            
-
+            return {fillColor: fillColor, fillOpacity: 0.7, strokeWidth: 0,visible: true };
         }
 
 
 
     }
     function county_responsive_highlighted_opts () {
+        return {visible: true, strokeWidth: 1, strokeColor: "black"};
 
     }
     function district_responsive_unselected_opts (poly, showflag) {
@@ -714,13 +680,6 @@ $(document).ready(function(){
 
         var selected_district = +config.get("contest");
 
-        if (selected_district && selected_district != district_id && selected_district !== 0)
-        {
-
-            return {fillColor: "#999", fillOpacity: 0.7, visible: true};
-
-        }
-
         var dem = contest.get("candidates").find(function(c){return c.get("party") == "Dem";});
         var rep = contest.get("candidates").find(function(c){return c.get("party") == "Rep";});
 
@@ -741,39 +700,19 @@ $(document).ready(function(){
             rep_percent = rep.get("vote_percent");
         }
 
-        if (rep_percent > 80)
+        var fillColor;
+        if (rep_percent > dem_percent)
         {
-            return {fillColor: REP_HI, fillOpacity: 0.7, strokeWidth: 1,visible: true };
+            fillColor = REP;
         }
-        else if (rep_percent > 60)
+        else if (dem_percent > rep_percent)
         {
-            return {fillColor: REP_MED, fillOpacity: 0.7, strokeWidth: 1,visible: true };
+            fillColor = DEM;
         }
-        else if (rep_percent > 50)
-        {
-            return {fillColor: REP_LO, fillOpacity: 0.7, strokeWidth: 1,visible: true };
-        }
+        else fillColor = "#999";
+            
 
-        else if (dem_percent > 80)
-        {
-            return {fillColor: DEM_HI, fillOpacity: 0.7, strokeWidth: 1,visible: true };
-        }
-        else if (dem_percent > 60)
-        {
-            return {fillColor: DEM_MED, fillOpacity: 0.7, strokeWidth: 1,visible: true };
-        }
-        else if (dem_percent > 50)
-        {
-            return {fillColor: DEM_LO, fillOpacity: 0.7, strokeWidth: 1,visible: true };
-        }
-        else
-        {
-            return {fillColor: "#999", fillOpacity: 0.7, strokeWidth: 1,visible: true };
-        }
-
-
-
-
+    return {fillColor: fillColor, fillOpacity: 0.7, strokeWidth: 0,visible: true };
 
     }
     function district_responsive_highlighted_opts (poly, showflag) {
@@ -783,6 +722,8 @@ $(document).ready(function(){
         {
             return {visible: false};
         }
+
+        return {strokeWidth: 1, strokeColor: "black"};
 
     }
     var DistrictMapView = Backbone.View.extend({
@@ -810,20 +751,18 @@ $(document).ready(function(){
                         highlightCallback : function () {
                             var district = +this.id;
                             config.set({contest: district});
-                            config.redraw_feature_set(feature_name);
 
 
                         },
                         unhighlightCallback : function () {
                             config.set({contest: '0'});
-                            config.redraw_feature_set(feature_name);
 
 
 
                         },
                         responsive_unselected_opts: function(){return district_responsive_unselected_opts(this, showflag);},
-
-                        responsive_highlighted_opts: function(){return district_responsive_highlighted_opts(this, showflag);}
+                        responsive_highlighted_opts: function(){return district_responsive_highlighted_opts(this, showflag);},
+                        selected_opts: {strokeWeight: 0}
 
 
                    });
@@ -887,19 +826,42 @@ $(document).ready(function(){
                     idselector: 'Data[name="NAME00"] value',
                     highlightCallback : function () {
                         var countyname = this.id;
-                        config.set({county: countyname});
-                        config.redraw_feature_set("county_features");
+                        if (config.get("body") == "ca.propositions")
+                        {
+                            config.set({county: countyname}, {silent: true});
+                            var proposition = +config.get("contest");
+                            var contest = election.find(function(b){return b.get("name") == "ca.propositions";}).get("contests").find(function(c){
+                                return +c.get("measure_number") == proposition;
+                            });
+                            contest.view.render(true);
+                        }
+
+
+                            
+                        else config.set({county: countyname});
 
 
                     },
                     unhighlightCallback: function() {
-                        config.set({county: ''});
-                        config.redraw_feature_set("county_features");
+                        if (config.get("body") == "ca.propositions")
+                        {
+                            config.set({county: ''}, {silent: true});
+                            var proposition = +config.get("contest");
+                            var contest = election.find(function(b){return b.get("name") == "ca.propositions";}).get("contests").find(function(c){
+                                return +c.get("measure_number") == proposition;
+                            });
+                            contest.view.render(true);
+                        }
+
+
+                            
+                        else config.set({county: ''});
 
                     },
                     responsive_unselected_opts: county_responsive_unselected_opts,
 
-                    responsive_highlighted_opts: county_responsive_highlighted_opts
+                    responsive_highlighted_opts: county_responsive_highlighted_opts,
+                    selected_opts: {strokeWeight: 0}
 
 
                });
@@ -1030,6 +992,30 @@ $(document).ready(function(){
     });
 
 
+    $('#zoomla').click(function(){
+        $('#zoombox').val("Los Angeles, CA");
+        config.codeAddress();
+
+    });
+    $('#zoomsf').click(function(){
+        $('#zoombox').val("San Francisco, CA");
+        config.codeAddress();
+
+    });
+
+    // Putting this in here since it's independent of what happens in election
+
+    var prop_descriptions = {30:"Increases taxes on earnings over $250,000 for seven years and sales taxes by 1/4 cent for four years, to fund schools.",
+    31:"Establishes two-year state budget.",
+    32:"Prohibits unions from using payroll-deducted funds for political purposes.",
+    33:"Changes current law to allow insurance companies to set prices based on whether the driver previously carried auto insurance.",
+    34:"Repeals death penalty and replaces it with life imprisonment without possibility of parole.",
+    35:"Increases prison sentences and fines for human trafficking convictions. Requires convicted human traffickers to register as sex offenders.",
+    36:"Revises law to impose life sentence only when new felony conviction is serious or violent.",
+    37:"Requires labeling of food sold to consumers made from plants or animals with genetic material changed in specified ways.",
+    38:"Increases taxes on earnings using sliding scale, for twelve years. Revenues go to K–12 schools and early childhood programs, and for four years to repaying state debt.",
+    39:"Requires multistate businesses to pay income taxes based on percentage of their sales in California. Dedicates revenues for five years to clean/efficient energy projects.",
+    40:"A Yes vote approves, and a No vote rejects, new State Senate districts drawn by the Citizens Redistricting Commission."};
     $.getJSON("data/election_data.json", function(data)
     {
         election = new Election();
@@ -1060,7 +1046,6 @@ $(document).ready(function(){
         });
         election.on("change", function(){
             router.navigate("#" + config.get("body") + "/" + config.get("contest") + "/" + (config.get("county") || 0), {trigger: true});
-            config.redraw_features();
 
         });
         $('.button').click(function(){
@@ -1099,6 +1084,7 @@ $(document).ready(function(){
 
 
     });
+
 
 
 
