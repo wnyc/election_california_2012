@@ -1039,7 +1039,7 @@ $(document).ready(function(){
         config.on("change:contest change:county", function(){
             router.navigate("#" + config.get("body") + "/" + config.get("contest") + "/" + config.get("county"), {trigger: true});
         });
-        config.on("change:body change:timeval", function(){
+        config.on("change:body", function(){
             router.navigate("#" + config.get("body"), {trigger: true});
             config.redraw_features();
 
@@ -1074,6 +1074,7 @@ $(document).ready(function(){
                 election.parse_bodies(data.bodies);
                 config.set({timeval: data.issuedate});
                 config.redraw_features();
+                router.show(config.get("body"));
                 $('#timeval').html(moment(data.issuedate).format("LLL"));
 
 
