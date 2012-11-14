@@ -99,21 +99,6 @@ h1 {
     text-shadow:0 1px 0 rgba(0,0,0,0.24);
     text-transform:uppercase;
 }
-    h1:before, h1:after {
-        content:'';
-        background:url('../img/star.png') no-repeat 0 0;
-        display:block;
-        position:absolute;
-        top:16px;
-        width:28px;
-        height:28px;
-    }
-    h1:before {
-        left: -40px;
-    }
-    h1:after {
-        right: -40px;
-    }
 h2 {
     font-size:1.125em;
     font-weight:600;
@@ -249,6 +234,21 @@ hr {
     /* Style adjustments for viewports that meet the condition */
     body {
         font-size: 1em;
+    }
+    h1:before, h1:after {
+        content:'';
+        background:url('../img/star.png') no-repeat 0 0;
+        display:block;
+        position:absolute;
+        top:16px;
+        width:28px;
+        height:28px;
+    }
+    h1:before {
+        left: -40px;
+    }
+    h1:after {
+        right: -40px;
     }
     #header .container, #main, #footer {
         padding:0 20px;
